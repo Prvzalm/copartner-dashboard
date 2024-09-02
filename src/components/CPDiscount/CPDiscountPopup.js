@@ -2,11 +2,13 @@ import { TextField } from "@mui/material";
 import React, { useState } from "react";
 import close from "../../assets/close.png";
 import { v4 as uuidv4 } from 'uuid'; // Import the UUID library
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css"; // Import the datepicker styles
 
 const CPDiscountPopup = ({ closeCPDiscount }) => {
   const [discount, setDiscount] = useState('');
-  const [validFrom, setValidFrom] = useState('');
-  const [validTo, setValidTo] = useState('');
+  const [validFrom, setValidFrom] = useState(null); // Initialize as null to show placeholder
+  const [validTo, setValidTo] = useState(null); // Initialize as null to show placeholder
 
   const handleAddDiscount = async () => {
     const cpapId = uuidv4(); // Generate a new random UUID
@@ -73,29 +75,32 @@ const CPDiscountPopup = ({ closeCPDiscount }) => {
             value={discount}
             onChange={(e) => setDiscount(e.target.value)}
           />
-          <TextField
-            id="validTo"
-            name="validTo"
-            variant="outlined"
-            label="Valid To"
-            fullWidth
-            required
-            value={validTo}
-            onChange={(e) => setValidTo(e.target.value)}
-          />
-          <TextField
-            id="validFrom"
-            name="validFrom"
-            variant="outlined"
-            label="Valid From"
-            fullWidth
-            required
-            value={validFrom}
-            onChange={(e) => setValidFrom(e.target.value)}
-          />
+
+          
+            <DatePicker
+              selected={validFrom}
+              onChange={(date) => setValidFrom(date)}
+              showTimeSelect
+              dateFormat="Pp"
+              placeholderText="Valid From"
+              className="w-full px-4 py-2 rounded-md border border-gray-300"
+            />
+          
+
+         
+            <DatePicker
+              selected={validTo}
+              onChange={(date) => setValidTo(date)}
+              showTimeSelect
+              dateFormat="Pp"
+              placeholderText="Valid To"
+              className="w-full px-4 py-2 rounded-md border border-gray-300"
+            />
+         
+
           <button
             type="submit"
-            className="col-span-2 px-12 bg-blue-500 text-white py-2 mb-8 border-2 rounded-lg"
+            className="col-span-2 px-12 bg-blue-500 text-white py-2 mb-8 border-2 rounded-lg" onClick={closeCPDiscount}
           >
             Add
           </button>
