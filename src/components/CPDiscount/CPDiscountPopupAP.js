@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { MenuItem, TextField } from "@mui/material";
 import close from "../../assets/close.png";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css"; // Import the datepicker styles
 
 const CPDiscountPopupAP = ({ closeCPDiscount }) => {
   const [affiliatePartners, setAffiliatePartners] = useState([]);
   const [selectedAP, setSelectedAP] = useState('');
   const [discount, setDiscount] = useState('');
-  const [validFrom, setValidFrom] = useState('');
-  const [validTo, setValidTo] = useState('');
+  const [validFrom, setValidFrom] = useState(null); // Initialize as null to show placeholder
+  const [validTo, setValidTo] = useState(null); // Initialize as null to show placeholder
 
   useEffect(() => {
     const fetchAffiliatePartners = async () => {
@@ -91,6 +93,7 @@ const CPDiscountPopupAP = ({ closeCPDiscount }) => {
             required
             value={selectedAP}
             onChange={(e) => setSelectedAP(e.target.value)}
+            className="w-full"
           >
             {affiliatePartners.map((partner) => (
               <MenuItem key={partner.id} value={partner.id}>
@@ -108,33 +111,36 @@ const CPDiscountPopupAP = ({ closeCPDiscount }) => {
             required
             value={discount}
             onChange={(e) => setDiscount(e.target.value)}
-          />
-             
-          <TextField
-            id="validTo"
-            name="validTo"
-            variant="outlined"
-            label="Valid To"
-            fullWidth
-            required
-            value={validTo}
-            onChange={(e) => setValidTo(e.target.value)}
+            className="w-full"
           />
 
-          <TextField
-            id="validFrom"
-            name="validFrom"
-            variant="outlined"
-            label="Valid From"
-            fullWidth
-            required
-            value={validFrom}
-            onChange={(e) => setValidFrom(e.target.value)}
-          />
+          
+            
+            <DatePicker
+              selected={validFrom}
+              onChange={(date) => setValidFrom(date)}
+              showTimeSelect
+              dateFormat="Pp"
+              placeholderText="Valid From"
+              className="w-full px-4 py-2 rounded-md border border-gray-300"
+            />
+         
+
+        
+            <DatePicker
+              selected={validTo}
+              onChange={(date) => setValidTo(date)}
+              showTimeSelect
+              dateFormat="Pp"
+              placeholderText="Valid To"
+              className="w-full px-4 py-2 rounded-md border border-gray-300"
+            />
+          
 
           <button
             type="submit"
             className="col-span-2 px-12 bg-blue-500 text-white py-2 mb-8 border-2 rounded-lg"
+            onClick={closeCPDiscount}
           >
             Add
           </button>
