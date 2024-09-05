@@ -94,6 +94,7 @@ const Sidebar = () => {
     { to: "/chatids", title: "Settings", label: "Chat IDs", icon: userIcon },
     { to: "/telegrampage", title: "Settings", label: "Telegram Page", icon: userIcon },
     { to: "/CPDiscount", title: "Settings", label: "CP Discount", icon: userIcon },
+    { to: "/Onboarding", title: "Settings", label: "Onboarding", icon: userIcon },
 
   ];
 

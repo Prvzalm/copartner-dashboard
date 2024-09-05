@@ -38,6 +38,7 @@ import TelegramPage from "./components/TelegramPage/TelegramPage";
 import CPDiscount from "./components/CPDiscount/CPDiscount";
 import ApCpTotal from "./components/ApCpTotal/APCpTotal";
 import MiniSub from "./components/MiniSub/MiniSub";
+import Onboarding from "./components/Onboarding/Onboarding";
 
 const App = () => {
   const token = sessionStorage.getItem("creds");
@@ -73,6 +74,7 @@ const App = () => {
           <Route path="telegrampage" element={<TelegramPage />} />
           <Route path="CPDiscount" element={<CPDiscount />} />
           <Route path="ApCpTotal" element={<ApCpTotal />} />
+          <Route path="Onboarding" element={<Onboarding />} />
         </Route>
         <Route path="signup" element={<Signup />} />
       </>
