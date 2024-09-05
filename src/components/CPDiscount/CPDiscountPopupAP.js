@@ -8,6 +8,7 @@ const CPDiscountPopupAP = ({  fetchAPData, closeCPDiscount, fetchAffiliatePartne
  
   const [selectedAP, setSelectedAP] = useState('');
   const [discount, setDiscount] = useState('');
+  const [discountPercentage, setDiscountPercentage] = useState('');
   const [validFrom, setValidFrom] = useState(null); // Initialize as null to show placeholder
   const [validTo, setValidTo] = useState(null); // Initialize as null to show placeholder
 
@@ -15,17 +16,29 @@ const CPDiscountPopupAP = ({  fetchAPData, closeCPDiscount, fetchAffiliatePartne
    
     fetchAffiliatePartners();
   }, []);
+  const handleDiscountChange = (e) => {
+    const value = e.target.value;
 
+    // Ensure the input is a number and not greater than 50
+    if (/^\d*$/.test(value)) { // This regex ensures that only digits are allowed
+      const numericValue = parseInt(value, 10);
+
+      if (numericValue <= 50 || value === "") {
+        setDiscountPercentage(value); // Set the state only if the value is less than or equal to 50
+      }
+    }
+  };
   const handleAddDiscount = async () => {
     const cpapId = selectedAP; // Use the selected Affiliate Partner's ID as cpapId
     const referralMode = "AP"; // Default referral mode
-    const couponCode = `COPAP${discount}`; // Generate the coupon code based on discount
-
+    const couponCode = `${discount}`; // Generate the coupon code based on discount
+    
+    
     const payload = {
       cpapId,
       referralMode,
       couponCode,
-      discountPercentage: parseInt(discount, 10), // Convert discount to integer
+      discountPercentage,// Convert discount to integer
       discountValidFrom: validFrom,
       discountValidTo: validTo,
       isActive: true,
@@ -104,6 +117,18 @@ const CPDiscountPopupAP = ({  fetchAPData, closeCPDiscount, fetchAffiliatePartne
             onChange={(e) => setDiscount(e.target.value)}
             className="w-full"
           />
+            <TextField
+      id="Discount"
+      name="discount"
+      label="Discount %"
+      variant="outlined"
+      fullWidth
+      required
+      value={discountPercentage}
+      onChange={handleDiscountChange}
+      className="w-full"
+      inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} // Ensure the user only enters numbers
+    />
 
           <DatePicker
             selected={validFrom}

@@ -7,19 +7,20 @@ import "react-datepicker/dist/react-datepicker.css"; // Import the datepicker st
 
 const CPDiscountPopup = ({ closeCPDiscount, fetchCPData }) => {
   const [discount, setDiscount] = useState('');
+  const [discountPercentage, setDiscountPercentage] = useState(''); // New state for discount percentage
   const [validFrom, setValidFrom] = useState(null); // Initialize as null to show placeholder
   const [validTo, setValidTo] = useState(null); // Initialize as null to show placeholder
 
   const handleAddDiscount = async () => {
     const cpapId = uuidv4(); // Generate a new random UUID
     const referralMode = "CP"; // Default referral mode
-    const couponCode = `COPAR${discount}`; // Generate the coupon code based on discount
+    const couponCode = `${discount}`; // Generate the coupon code based on discount
 
     const payload = {
       cpapId,
       referralMode,
       couponCode,
-      discountPercentage : parseInt(discount.slice(-2), 10), // Convert discount to integer
+      discountPercentage, // Use discountPercentage from the input
       discountValidFrom: validFrom,
       discountValidTo: validTo,
       isActive: true,
@@ -38,13 +39,27 @@ const CPDiscountPopup = ({ closeCPDiscount, fetchCPData }) => {
 
       if (response.ok) {
         console.log("Discount added successfully", responseData);
-        fetchCPData();
+        fetchCPData(); // Fetch the updated data
         closeCPDiscount(); // Close the popup on success
       } else {
         console.error("Failed to add discount", responseData);
       }
     } catch (error) {
       console.error("Error:", error);
+    }
+  };
+
+  // Handle input for the discount percentage, ensuring it's between 0 and 50
+  const handleDiscountPercentageChange = (e) => {
+    const value = e.target.value;
+
+    // Ensure the input is a number and not greater than 50
+    if (/^\d*$/.test(value)) { // Only allow digits
+      const numericValue = parseInt(value, 10);
+
+      if (numericValue <= 50 || value === "") {
+        setDiscountPercentage(value); // Set the state only if the value is less than or equal to 50
+      }
     }
   };
 
@@ -70,12 +85,24 @@ const CPDiscountPopup = ({ closeCPDiscount, fetchCPData }) => {
           <TextField
             id="Discount"
             name="discount"
-            label="Discount"
+            label="Discount Code"
             variant="outlined"
             fullWidth
             required
             value={discount}
             onChange={(e) => setDiscount(e.target.value)}
+          />
+
+          <TextField
+            id="DiscountPercentage"
+            name="discountPercentage"
+            label="Discount Percentage"
+            variant="outlined"
+            fullWidth
+            required
+            value={discountPercentage}
+            onChange={handleDiscountPercentageChange} // Handle the percentage change
+            inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }} // Ensure only numbers can be entered
           />
 
           <DatePicker
