@@ -1,0 +1,125 @@
+Affiliate Partner Onboarding Website Concept
+
+Website Structure and Flow
+
+1. Homepage / Welcome Screen
+
+Content:
+
+	•	Main Heading:
+Welcome to Copartner’s Affiliate Partner Onboarding Portal
+	•	Subheading:
+Start Your Journey as a Copartner Affiliate Partner
+	•	Introduction:
+“Copartner offers an exciting opportunity for professionals to become Affiliate Partners, earning by referring clients to our platform. To ensure that we maintain high standards, we have established a detailed onboarding process. Complete all steps, and once verified, you will receive training to maximize your success as a Copartner Affiliate Partner.”
+	•	Call-to-Action Button:
+[Get Started with Your Onboarding]
+
+2. Registration Page
+
+Content:
+
+	•	Main Heading:
+Create Your Copartner Affiliate Partner Account
+	•	Form Fields:
+	•	Full Name:
+[Text Box]
+Placeholder: “Enter your full name”
+	•	Email Address:
+[Text Box]
+Placeholder: “Enter your email address”
+	•	Phone Number:
+[Text Box]
+Placeholder: “Enter your contact number”
+
+	•	Checkbox:
+[ ] I agree to the [Terms and Conditions] of Copartner
+	•	Submit Button:
+[Create Account and Start Onboarding]
+
+3. Onboarding Dashboard
+
+Content:
+
+	•	Main Heading:
+Welcome to Your Affiliate Partner Onboarding Dashboard
+	•	Subheading:
+“Complete each step below to move forward with your Copartner Affiliate Partner onboarding process. You can save your progress and return at any time.”
+
+Step 1: Identity Verification
+
+	•	Step Description:
+“Upload a government-issued ID to verify your identity as an Affiliate Partner.”
+	•	Form Fields:
+	•	Upload ID Document:
+[Upload Button]
+File type accepted: PDF, JPG, PNG. Max size: 5MB.
+	•	Additional Information:
+[Text Box (Multi-line)]
+Placeholder: “Provide any additional information relevant to your identity verification.”
+	•	Legal Name :
+[Text Box]
+Placeholder: “Enter your legal name ”
+	•	PAN CARD NO.:
+[Text Box]
+Placeholder: “Enter your PAN card number”
+	•	GST NO.(If applicable):
+[Text Box]
+Placeholder: “Enter your GST number(optional)”
+	•	Address:
+[Text Box]
+Placeholder: “Enter your legal address”
+	•	State:
+[Text Box]
+Placeholder: “Enter your state”
+	•	Status Box:
+Status:
+Pending Verification
+	•	Save and Continue Button:
+[Save and Continue to Next Step]
+
+Step 2: Affiliate Marketing Experience Assessment
+
+	•	Step Description:
+“Answer the following questions to demonstrate your understanding of affiliate marketing and compliance.”
+	•	Form Fields:
+	•	Question 1:
+“How long have you been involved in affiliate marketing?”
+[Text Box]
+Placeholder: “Enter your answer here”
+	•	Question 2:
+“How do you ensure compliance with legal and ethical standards in your marketing activities?”
+[Text Box]
+Placeholder: “Enter your answer here”
+	•	Question 3:
+“Describe a successful affiliate campaign you have managed.”
+[Text Box]
+Placeholder: “Enter your answer here”
+	•	Question 4:
+“Have you ever faced any penalties or compliance issues related to your affiliate activities?”
+[Text Box]
+Placeholder: “Enter your answer here”
+	•	Status Box:
+Status:
+Completed
+	•	Submit Quiz Button:
+[Submit Quiz and Continue to Next Step]
+
+Step 3: Final Review, Submission, and Agreement Signing
+
+	•	Step Description:
+“Review all your submissions, finalize your onboarding process, and sign the mandatory agreement.”
+	•	Form Fields:
+	•	Review Summary:
+	•	Step 1: Identity Verification: Status: Pending Verification
+	•	Step 2: Affiliate Marketing Experience Assessment: Status: Completed
+	•	Step 3: Final Agreement Signing:
+	•	Agreement Text: “To complete your onboarding, you are required to sign a final agreement that outlines your responsibilities and the terms of your engagement with Copartner.”
+	•	SMS Agreement: “An agreement will be sent to your registered phone number via SMS after pending verification is completed. Please review and sign the agreement to proceed by coming again to site with your onboarding.”
+	•	Confirmation Box:
+[ ] I have signed the agreement sent to my phone number.
+Note: Ensure that you have signed the agreement. Your onboarding cannot be completed without it.
+	•	Final Submission Button:
+[Submit All Steps and Confirm Agreement Signing]
+	•	Confirmation Message:
+“Thank you for completing the onboarding steps. Your submission is under review. Once we have verified all details and received your signed agreement, you will be entitled to a training program and will be officially onboarded as a Copartner Affiliate Partner. You will receive further instructions via email.”

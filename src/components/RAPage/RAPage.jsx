@@ -51,7 +51,7 @@ const RAPage = () => {
     const fetchExpertsData = async () => {
       try {
         const expertsResponse = await fetch(
-          "https://copartners.in:5132/api/Experts?page=1&pageSize=10"
+          "https://copartners.in:5132/api/Experts?page=1&pageSize=10000"
         );
         if (!expertsResponse.ok) {
           throw new Error(`Failed to fetch experts: ${expertsResponse.status}`);
