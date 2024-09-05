@@ -19,7 +19,7 @@ const CPDiscountPopup = ({ closeCPDiscount, fetchCPData }) => {
       cpapId,
       referralMode,
       couponCode,
-      discountPercentage: parseInt(discount, 10), // Convert discount to integer
+      discountPercentage : parseInt(discount.slice(-2), 10), // Convert discount to integer
       discountValidFrom: validFrom,
       discountValidTo: validTo,
       isActive: true,
