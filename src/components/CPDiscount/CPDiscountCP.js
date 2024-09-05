@@ -5,27 +5,9 @@ import Clip from "../../assets/Clipboard.png";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const CPDiscountCP = () => {
-  const [cpData, setCpData] = useState([]);
+const CPDiscountCP = ({fetchCPData, cpData, setCpData}) => {
 
   useEffect(() => {
-    const fetchCPData = async () => {
-      try {
-        const response = await fetch(
-          "https://copartners.in:5009/api/RefferalCoupon"
-        );
-        if (!response.ok) {
-          throw new Error("Something went wrong, status " + response.status);
-        }
-        const data = await response.json();
-        // Filter out any coupons with referralMode "AP"
-        const filteredData = data.data.filter(coupon => coupon.referralMode !== "AP");
-        setCpData(filteredData);
-      } catch (error) {
-        toast.error(`Failed to fetch data: ${error.message}`);
-      }
-    };
-
     fetchCPData();
   }, []);
 

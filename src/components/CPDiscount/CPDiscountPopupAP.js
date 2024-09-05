@@ -4,27 +4,15 @@ import close from "../../assets/close.png";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css"; // Import the datepicker styles
 
-const CPDiscountPopupAP = ({ closeCPDiscount }) => {
-  const [affiliatePartners, setAffiliatePartners] = useState([]);
+const CPDiscountPopupAP = ({  fetchAPData, closeCPDiscount, fetchAffiliatePartners, affiliatePartners,setAffiliatePartners }) => {
+ 
   const [selectedAP, setSelectedAP] = useState('');
   const [discount, setDiscount] = useState('');
   const [validFrom, setValidFrom] = useState(null); // Initialize as null to show placeholder
   const [validTo, setValidTo] = useState(null); // Initialize as null to show placeholder
 
   useEffect(() => {
-    const fetchAffiliatePartners = async () => {
-      try {
-        const response = await fetch('https://copartners.in:5133/api/AffiliatePartner?page=1&pageSize=10');
-        if (!response.ok) {
-          throw new Error("Failed to fetch affiliate partners");
-        }
-        const data = await response.json();
-        setAffiliatePartners(data.data || []);
-      } catch (error) {
-        console.error("Error fetching affiliate partners:", error);
-      }
-    };
-
+   
     fetchAffiliatePartners();
   }, []);
 
@@ -52,15 +40,18 @@ const CPDiscountPopupAP = ({ closeCPDiscount }) => {
         body: JSON.stringify(payload),
       });
 
+      const responseData = await response.json();
+
       if (response.ok) {
-        console.log("Discount added successfully");
-        // Optionally, add code here to handle success (e.g., closing the popup, showing a success message)
+        console.log("Discount added successfully", responseData);
+        fetchAPData();
+        // refreshData(); // Refresh the data after adding
+        closeCPDiscount(); // Close the popup on success
       } else {
-        throw new Error("Failed to add discount");
+        console.error("Failed to add discount", responseData);
       }
     } catch (error) {
       console.error("Error:", error);
-      // Optionally, add code here to handle the error (e.g., showing an error message)
     }
   };
 
@@ -114,33 +105,27 @@ const CPDiscountPopupAP = ({ closeCPDiscount }) => {
             className="w-full"
           />
 
-          
-            
-            <DatePicker
-              selected={validFrom}
-              onChange={(date) => setValidFrom(date)}
-              showTimeSelect
-              dateFormat="Pp"
-              placeholderText="Valid From"
-              className="w-full px-4 py-2 rounded-md border border-gray-300"
-            />
-         
+          <DatePicker
+            selected={validFrom}
+            onChange={(date) => setValidFrom(date)}
+            showTimeSelect
+            dateFormat="Pp"
+            placeholderText="Valid From"
+            className="w-full px-4 py-2 rounded-md border border-gray-300"
+          />
 
-        
-            <DatePicker
-              selected={validTo}
-              onChange={(date) => setValidTo(date)}
-              showTimeSelect
-              dateFormat="Pp"
-              placeholderText="Valid To"
-              className="w-full px-4 py-2 rounded-md border border-gray-300"
-            />
-          
+          <DatePicker
+            selected={validTo}
+            onChange={(date) => setValidTo(date)}
+            showTimeSelect
+            dateFormat="Pp"
+            placeholderText="Valid To"
+            className="w-full px-4 py-2 rounded-md border border-gray-300"
+          />
 
           <button
             type="submit"
             className="col-span-2 px-12 bg-blue-500 text-white py-2 mb-8 border-2 rounded-lg"
-            onClick={closeCPDiscount}
           >
             Add
           </button>

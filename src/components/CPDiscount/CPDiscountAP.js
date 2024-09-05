@@ -4,48 +4,14 @@ import Bin from "../../assets/TrashBinMinimalistic.png";
 import Clip from "../../assets/Clipboard.png";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
 
-const CPDiscountAP = () => {
-  const [apData, setApData] = useState([]);
+const CPDiscountAP = ({fetchAPData, apData, setApData}) => {
+ 
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchAPData = async () => {
-      try {
-        const response = await fetch("https://copartners.in:5009/api/RefferalCoupon");
-        if (!response.ok) {
-          throw new Error("Something went wrong, status " + response.status);
-        }
-        const data = await response.json();
-        // Filter to show only records with referralMode "AP"
-        const filteredData = data.data.filter((coupon) => coupon.referralMode === "AP");
-
-        // Fetch AP names for each coupon
-        const apDataWithNames = await Promise.all(
-          filteredData.map(async (coupon) => {
-            const apResponse = await fetch(
-              `https://copartners.in:5133/api/AffiliatePartner/${coupon.cpapId}`
-            );
-
-            if (apResponse.ok) {
-              const apData = await apResponse.json();
-              return {
-                ...coupon,
-                affiliatePartnerName: apData.data.legalName,
-              };
-            } else {
-              return {
-                ...coupon,
-                affiliatePartnerName: "Unknown",
-              };
-            }
-          })
-        );
-
-        setApData(apDataWithNames);
-      } catch (error) {
-        toast.error(`Failed to fetch data: ${error.message}`);
-      }
-    };
+    
 
     fetchAPData();
   }, []);
