@@ -41,7 +41,12 @@ const Sidebar = () => {
     // { to: "/notification", title: "Notification", label: "Notification", icon: userIcon },
     { to: "/", title: "Dashboard", label: "A.P", icon: userIcon },
     { to: "/r.a", title: "Overview", label: "R.A", icon: userIcon },
-    {to: "/ApCpTotal", title:"totalRAAp",label:"CP Earning", icon:userIcon},
+    {
+      to: "/ApCpTotal",
+      title: "totalRAAp",
+      label: "CP Earning",
+      icon: userIcon,
+    },
     {
       to: "/blogs",
       title: "Settings",
@@ -59,6 +64,12 @@ const Sidebar = () => {
       title: "Settings",
       label: "A.P Details",
       icon: IoSettingsOutline,
+    },
+    {
+      to: "/Onboarding",
+      title: "Settings",
+      label: "Onboarding",
+      icon: userIcon,
     },
     {
       to: "/minisub",
@@ -86,16 +97,50 @@ const Sidebar = () => {
       icon: userIcon,
     },
     { to: "/userdata", title: "Settings", label: "User Data", icon: userIcon },
-    { to: "/relationship", title: "Settings", label: "Relationship Management", icon: userIcon },
+    {
+      to: "/relationship",
+      title: "Settings",
+      label: "Relationship Management",
+      icon: userIcon,
+    },
     { to: "/join", title: "Settings", label: "Join", icon: userIcon },
-    { to: "/sub-admin", title: "Settings", label: "Sub Admin Management", icon: userIcon },
-    { to: "/login", title: "Settings", label: "Login Credentials", icon: userIcon },
-    { to: "/rauserdata", title: "Settings", label: "RA User Data", icon: userIcon },
+    {
+      to: "/sub-admin",
+      title: "Settings",
+      label: "Sub Admin Management",
+      icon: userIcon,
+    },
+    {
+      to: "/login",
+      title: "Settings",
+      label: "Login Credentials",
+      icon: userIcon,
+    },
+    {
+      to: "/rauserdata",
+      title: "Settings",
+      label: "RA User Data",
+      icon: userIcon,
+    },
     { to: "/chatids", title: "Settings", label: "Chat IDs", icon: userIcon },
-    { to: "/telegrampage", title: "Settings", label: "Telegram Page", icon: userIcon },
-    { to: "/CPDiscount", title: "Settings", label: "CP Discount", icon: userIcon },
-    { to: "/Onboarding", title: "Settings", label: "Onboarding", icon: userIcon },
-
+    {
+      to: "/telegrampage",
+      title: "Settings",
+      label: "Telegram Page",
+      icon: userIcon,
+    },
+    {
+      to: "/CPDiscount",
+      title: "Settings",
+      label: "CP Discount",
+      icon: userIcon,
+    },
+    {
+      to: "/Onboarding",
+      title: "Settings",
+      label: "Onboarding",
+      icon: userIcon,
+    },
   ];
 
   return (
@@ -130,7 +175,11 @@ const Sidebar = () => {
         aria-label="Sidebar"
       >
         <div className="flex flex-col h-full overflow-hidden">
-          <Link onClick={() => handleClickOutside(click)} to="/" className="flex items-center py-6 px-7">
+          <Link
+            onClick={() => handleClickOutside(click)}
+            to="/"
+            className="flex items-center py-6 px-7"
+          >
             <img src={Logo} className="h-10 mr-3" alt="Logo" />
           </Link>
           <div className="overflow-y-auto">
