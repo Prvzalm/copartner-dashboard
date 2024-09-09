@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import PageHeader from "../Header/Header";
@@ -57,6 +58,36 @@ const MiniSub = () => {
     }
   };
 
+  const handleToggle = (id, isActive) => {
+    const patchData = [
+      {
+        "path": "isActive",
+        "op": "replace",
+        "value": isActive ? "true" : "false"
+      }
+    ];
+
+    axios.patch(`https://copartners.in:5009/api/Subscription?Id=${id}`, patchData, {
+      headers: {
+        'Content-Type': 'application/json-patch+json',
+      }
+    })
+      .then(response => {
+        if (response.data.isSuccess) {
+          toast.success(`Subscription ${isActive ? 'activated' : 'deactivated'} successfully`);
+          setSubscriptions((prevSubscriptions) =>
+            prevSubscriptions.map(sub => sub.id === id ? { ...sub, isActive } : sub)
+          );
+        } else {
+          toast.error(`Failed to ${isActive ? 'activate' : 'deactivate'} subscription`);
+        }
+      })
+      .catch(error => {
+        console.error(`Error updating subscription:`, error);
+        toast.error(`Error updating subscription`);
+      });
+  };
+
   return (
     <div className="dashboard-container p-0 sm:ml-60">
       <PageHeader
@@ -71,12 +102,6 @@ const MiniSub = () => {
           <div className="table-list-mb">
             <div className="channel-heading flex">
               <h3 className="text-xl font-semibold mr-auto">Minor Subscription Listing</h3>
-              {/* <button
-                className="border-2 border-black rounded-lg px-4 py-1 mr-4"
-                aria-label="Add new MiniSub detail"
-              >
-                + Add
-              </button> */}
             </div>
             <div className="py-4 px-8">
               <div className="overflow-x-auto">
@@ -89,6 +114,7 @@ const MiniSub = () => {
                       <th className="px-6 py-3 text-left uppercase tracking-wider">Plan Type</th>
                       <th className="px-6 py-3 text-left uppercase tracking-wider">Duration</th>
                       <th className="px-6 py-3 text-left uppercase tracking-wider">Amount</th>
+                      <th className="px-6 py-3 text-left uppercase tracking-wider">AP Sub</th> {/* New AP Sub column */}
                       <th className="px-6 py-3 text-left uppercase tracking-wider">Action</th>
                     </tr>
                   </thead>
@@ -101,6 +127,19 @@ const MiniSub = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{sub.planType}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{sub.durationMonth} Days</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹ {sub.amount}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {/* AP Sub Toggle Switch */}
+                          <label className="inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={sub.isActive} // Assuming there is an `isActive` field
+                              onChange={(e) => handleToggle(sub.id, e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-400 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                            {/* <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">AP Sub</span> */}
+                          </label>
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           <button
                             onClick={() => handleDelete(sub.id)}
@@ -124,3 +163,4 @@ const MiniSub = () => {
 };
 
 export default MiniSub;
+
