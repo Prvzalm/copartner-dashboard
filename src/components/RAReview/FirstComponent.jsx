@@ -68,7 +68,7 @@ const FirstComponent = ({ handleNextStep, onBoardId }) => {
             className="px-4 py-2 border rounded-lg bg-white shadow-sm"
           >
             <option value="Pending">Pending</option>
-            <option value="Accepted">Complete</option>
+            <option value="Complete">Complete</option>
             <option value="Rejected">Rejected</option>
           </select>
         </div>
@@ -82,11 +82,11 @@ const FirstComponent = ({ handleNextStep, onBoardId }) => {
               <img
                 src={profileImage}
                 alt="Profile"
-                className="h-32 w-32 object-cover rounded-full"
+                className="h-[400px] w-full object-cover"
               />
             ) : (
               <label className="text-gray-400 cursor-pointer">
-                <div className="h-32 w-32 border-dashed flex items-center justify-center rounded-full">
+                <div className="h-32 w-48 border-dashed flex items-center justify-center rounded-full">
                   Profile Image
                 </div>
                 {/* <input
