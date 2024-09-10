@@ -4,12 +4,23 @@ import { useNavigate } from "react-router-dom";
 
 const Onboarding = () => {
   const [onBoardingData, setOnBoardingData] = useState([]);
+  const [onBoardingDataAP, setonBoardingDataAP] = useState([]);
   const [activeButton, setActiveButton] = useState("button1");
   const navigate = useNavigate();
 
   const handleRAClick = (id) => {
-    navigate(`${id}`);
+    navigate(`RA/${id}`);
   };
+
+  const handleAPClick = (id) => {
+    navigate(`AP/${id}`);
+  }
+
+  const fetchApOnboarding = async () => {
+    const response = await fetch("https://copartners.in:5138/api/APCreateUser");
+    const data = await response.json();
+    setonBoardingDataAP(data);
+  }
 
   const fetchOnboardingUser = async () => {
     const response = await fetch("https://copartners.in:5136/api/User");
@@ -19,6 +30,7 @@ const Onboarding = () => {
 
   useEffect(() => {
     fetchOnboardingUser();
+    fetchApOnboarding();
   }, []);
 
   const handleButtonClick = (buttonId) => {
@@ -28,7 +40,7 @@ const Onboarding = () => {
   return (
     <div className="dashboard-container p-0 sm:ml-60">
       <PageHeader
-        title="Earnings"
+        title="Onboarding"
         searchQuery=""
         setSearchQuery={() => {}}
         hasNotification={false}
@@ -55,40 +67,76 @@ const Onboarding = () => {
       </div>
 
       <div className="p-4">
-        <div className="dashboard-view-section mb-4">
-          <div className="table-list-mb">
-            <div className="py-4 px-8">
-              <table className="table-list">
-                <thead>
-                  <tr>
-                    <th>RA Name</th>
-                    <th>Sebi Reg Number</th>
-                    <th>Email</th>
-                    <th>Phone Number</th>
-                    <th>Company Name</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {onBoardingData.map((onboard) => (
-                    <tr
-                      onClick={() => handleRAClick(onboard.userId)}
-                      key={onboard.userId}
-                      className="even:bg-gray-100 odd:bg-white cursor-pointer"
-                    >
-                      <td>{onboard.fullName}</td>
-                      <td>{onboard.sebiRegNumber}</td>
-                      <td>{onboard.email}</td>
-                      <td>{onboard.phoneNumber}</td>
-                      <td>{onboard.companyName}</td>
-                      <td className="text-[#F8961E]">{"Pending Action"}</td>
-                      {console.log(onboard.userId)}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        <div className="p-4">
+          {activeButton === "button1" ? (
+            // Table for RA data
+            <div className="dashboard-view-section mb-4">
+              <div className="table-list-mb">
+                <div className="py-4 px-8">
+                  <table className="table-list">
+                    <thead>
+                      <tr>
+                        <th>RA Name</th>
+                        <th>Sebi Reg Number</th>
+                        <th>Email</th>
+                        <th>Phone Number</th>
+                        <th>Company Name</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {onBoardingData.map((onboard) => (
+                        <tr
+                          onClick={() => handleRAClick(onboard.userId)}
+                          key={onboard.userId}
+                          className="even:bg-gray-100 odd:bg-white cursor-pointer"
+                        >
+                          <td>{onboard.fullName}</td>
+                          <td>{onboard.sebiRegNumber}</td>
+                          <td>{onboard.email}</td>
+                          <td>{onboard.phoneNumber}</td>
+                          <td>{onboard.companyName}</td>
+                          <td className="text-[#F8961E]">{"Pending Action"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
-          </div>
+          ) : (
+            // Table for AP data
+            <div className="dashboard-view-section mb-4">
+              <div className="table-list-mb">
+                <div className="py-4 px-8">
+                  <table className="table-list">
+                    <thead>
+                      <tr>
+                        <th>AP Name</th>
+                        <th>Email</th>
+                        <th>Phone Number</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {onBoardingDataAP.map((onboard) => (
+                        <tr
+                          onClick={() => handleAPClick(onboard.userId)}
+                          key={onboard.userId}
+                          className="even:bg-gray-100 odd:bg-white cursor-pointer"
+                        >
+                          <td>{onboard.fullName}</td>
+                          <td>{onboard.emailAdd}</td>
+                          <td>{onboard.phoneNumber}</td>
+                          <td><input type="checkbox" checked={onboard.checkBox} /></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

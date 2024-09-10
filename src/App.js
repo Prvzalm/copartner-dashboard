@@ -40,6 +40,7 @@ import ApCpTotal from "./components/ApCpTotal/APCpTotal";
 import MiniSub from "./components/MiniSub/MiniSub";
 import Onboarding from "./components/Onboarding/Onboarding";
 import RAReview from "./components/RAReview/RAReview";
+import APReview from "./components/APReview/APReview";
 
 const App = () => {
   const token = sessionStorage.getItem("creds");
@@ -76,7 +77,8 @@ const App = () => {
           <Route path="CPDiscount" element={<CPDiscount />} />
           <Route path="ApCpTotal" element={<ApCpTotal />} />
           <Route path="Onboarding" element={<Onboarding />} />
-          <Route path="Onboarding/:onBoardId" element={<RAReview />} />
+          <Route path="Onboarding/RA/:onBoardId" element={<RAReview />} />
+          <Route path="Onboarding/AP/:onBoardAPId" element={<APReview />} />
         </Route>
         <Route path="signup" element={<Signup />} />
       </>
