@@ -141,6 +141,12 @@ const Sidebar = () => {
       label: "Onboarding",
       icon: userIcon,
     },
+    {
+      to: "/WhatsappCamp",
+      title: "Settings",
+      label: "Whatsapp Camp",
+      icon: userIcon,
+    },
   ];
 
   return (
