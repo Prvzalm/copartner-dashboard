@@ -10,34 +10,45 @@ const CreateGroup = ({ selectedUsers, closePopup }) => {
       return;
     }
 
+    if (selectedUsers.length === 0) {
+      alert('Please select at least one user');
+      return;
+    }
+
     setIsSubmitting(true); // Set loading state
 
     try {
-      const response = await fetch('http://localhost:3000/api/users', {
-        method: 'PATCH',
+      const response = await fetch('http://localhost:5001/api/groups', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userIds: selectedUsers, // Pass the selected user IDs
-          groupName: groupName.trim(), // Pass the trimmed group name
+          groupName: groupName.trim(),
+          users: selectedUsers.map(user => ({
+            userId: user.userId, // Assuming user object has `userId`
+            name: user.name, // Assuming user object has `name`
+            mobileNumber: user.mobileNumber, // Assuming user object has `mobileNumber`
+          })),
         }),
       });
-
+  
       if (response.ok) {
-        alert('Group name updated successfully');
+        const data = await response.json();
+        alert(`Group created successfully with ID: ${data.group._id}`);
         closePopup(); // Close the popup after a successful patch request
       } else {
         const errorData = await response.json();
-        alert(`Failed to update group name: ${errorData.error}`);
+        alert(`Failed to create group: ${errorData.error}`);
       }
     } catch (error) {
-      console.error('Error updating group name:', error);
-      alert('An error occurred while updating the group name');
+      console.error('Error creating group:', error);
+      alert('An error occurred while creating the group');
     } finally {
       setIsSubmitting(false); // Reset loading state
     }
   };
+  
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">

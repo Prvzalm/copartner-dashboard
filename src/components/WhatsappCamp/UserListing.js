@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CreateGroup from './CreateGroup';
 
 const UserListing = ({ apDetails }) => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
+  const [selectAll, setSelectAll] = useState(false);
 
   // Helper function to map serviceType values to corresponding strings
   const mapServiceType = (serviceType) => {
@@ -19,15 +20,35 @@ const UserListing = ({ apDetails }) => {
     }
   };
 
-  const handleCheckboxChange = (userId) => {
-    if (selectedUsers.includes(userId)) {
-      setSelectedUsers(selectedUsers.filter((id) => id !== userId));
+  // Toggle checkbox for individual users
+  const handleCheckboxChange = (user) => {
+    const userExists = selectedUsers.find((u) => u.userId === user.id);
+    if (userExists) {
+      setSelectedUsers(selectedUsers.filter((u) => u.userId !== user.id));
     } else {
-      setSelectedUsers([...selectedUsers, userId]);
+      setSelectedUsers([
+        ...selectedUsers,
+        { userId: user.id, name: user.name, mobileNumber: user.mobileNumber },
+      ]);
     }
   };
 
-  const rowsPerPage = 100; // Set the number of rows per page
+  // Select or Deselect all users on the current page
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedUsers([]); // Deselect all
+    } else {
+      const usersToSelect = currentData.map((user) => ({
+        userId: user.id,
+        name: user.name,
+        mobileNumber: user.mobileNumber,
+      }));
+      setSelectedUsers(usersToSelect);
+    }
+    setSelectAll(!selectAll);
+  };
+
+  const rowsPerPage = 500; // Set the number of rows per page
   const [currentPage, setCurrentPage] = useState(1);
 
   // Calculate the total number of pages, handling empty or undefined data gracefully
@@ -42,35 +63,59 @@ const UserListing = ({ apDetails }) => {
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
+      setSelectAll(false); // Reset the selectAll state
     }
   };
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
+      setSelectAll(false); // Reset the selectAll state
     }
   };
+
+  // Calculate the number of filtered users and the current page's users
+  const filteredUsersCount = apDetails.length;
+  const usersOnCurrentPageCount = currentData.length;
+
+  useEffect(() => {
+    // If all users are selected, keep the checkbox state in sync
+    const allSelected = currentData.length > 0 && currentData.every((user) =>
+      selectedUsers.some((u) => u.userId === user.id)
+    );
+    setSelectAll(allSelected);
+  }, [currentData, selectedUsers]);
 
   return (
     <div className="py-4 px-8">
       <div className="table-container overflow-x-auto">
-        <h2 className="pl-3 text-xl font-semibold">User Listing</h2>
-        <div className="flex justify-end space-x-4">
-          <button className="border rounded-lg border-black p-2">Send Message</button>
-          <button
-            className="border rounded-lg border-black p-2"
-            onClick={() => setShowPopup(true)}
-          >
-            Create Group
-          </button>
-          <button className="border rounded-lg border-black p-2">Filter</button>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="pl-3 text-xl font-semibold">
+            User Listing
+            <small className="ml-2 text-sm font-light">
+              ({filteredUsersCount} total users, {usersOnCurrentPageCount} on this page)
+            </small>
+          </h2>
+          <div className="flex space-x-4">
+            <button className="border rounded-lg border-black p-2">Send Message</button>
+            <button
+              className="border rounded-lg border-black p-2"
+              onClick={() => setShowPopup(true)}
+            >
+              Create Group
+            </button>
+          </div>
         </div>
 
         <table className="table-list min-w-max">
           <thead>
             <tr className="requestColumns">
               <th style={{ textAlign: 'left', paddingLeft: '2rem' }}>
-                <input type="checkbox" onChange={() => {}} />
+                <input
+                  type="checkbox"
+                  checked={selectAll}
+                  onChange={handleSelectAll}
+                />
               </th>
               <th style={{ textAlign: 'left', paddingLeft: '2rem' }}>Date</th>
               <th style={{ textAlign: 'left' }}>Name</th>
@@ -99,8 +144,8 @@ const UserListing = ({ apDetails }) => {
                       >
                         <input
                           type="checkbox"
-                          onChange={() => handleCheckboxChange(apdetail.id)}
-                          checked={selectedUsers.includes(apdetail.id)}
+                          onChange={() => handleCheckboxChange(apdetail)}
+                          checked={selectedUsers.some((u) => u.userId === apdetail.id)}
                         />
                       </td>
                       <td style={{ textAlign: 'left' }} className="p-3">

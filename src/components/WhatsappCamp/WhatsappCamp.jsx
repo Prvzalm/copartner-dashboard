@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import UserListing from "./UserListing";
 import Group from "./Group";
-import Filter from "./Filter"; // Import Filter component
+import Filter from "./Filter";
+import Scheduling from "./Scheduling";
 
 const WhatsappCamp = () => {
   const navigate = useNavigate();
@@ -13,14 +14,14 @@ const WhatsappCamp = () => {
   const [groupData, setGroupData] = useState([]);
   const [userDetails, setUserDetails] = useState([]);
   const [currentView, setCurrentView] = useState("UserListing");
-  const [filterVisible, setFilterVisible] = useState(false); // State to control filter popup visibility
+  const [filterVisible, setFilterVisible] = useState(false);
   const [filters, setFilters] = useState(null);
 
   useEffect(() => {
     const fetchAPDetails = async () => {
       try {
         const response = await fetch(
-          `https://copartners.in:5131/api/User?page=1&pageSize=10000`
+          `https://copartners.in:5131/api/User?page=1&pageSize=100000`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch user data");
@@ -46,17 +47,12 @@ const WhatsappCamp = () => {
   useEffect(() => {
     const fetchGroupData = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/users?page=1&pageSize=10000`
-        );
+        const response = await fetch(`http://localhost:5001/api/groups`);
         if (!response.ok) {
           throw new Error("Failed to fetch group data");
         }
         const data = await response.json();
-        const sortedData = data.data.sort(
-          (a, b) => new Date(b.createdOn) - new Date(a.createdOn)
-        );
-        setGroupData(sortedData);
+        setGroupData(data); // Assuming data is an array of groups
       } catch (error) {
         console.error("Fetching error:", error);
         toast.error(`Failed to fetch group data: ${error.message}`);
@@ -95,7 +91,7 @@ const WhatsappCamp = () => {
       });
 
       const additionalData = await Promise.all(operations);
-      setUserDetails(additionalData.filter(Boolean)); // Filter out null responses
+      setUserDetails(additionalData.filter(Boolean));
     };
 
     if (apDetails.length > 0) {
@@ -113,12 +109,12 @@ const WhatsappCamp = () => {
 
   const applyFilter = (filters) => {
     setFilters(filters);
-    setFilterVisible(false); // Close the filter popup after applying filters
+    setFilterVisible(false);
   };
 
   const clearFilter = () => {
     setFilters(null);
-    setFilterVisible(false); // Close the filter popup after clearing filters
+    setFilterVisible(false);
   };
 
   const filteredUserData = combinedUserData.filter((user) => {
@@ -132,6 +128,7 @@ const WhatsappCamp = () => {
       selectedSubscriptionType,
       selectedRAName,
       amountRange,
+      selectedAmount, // New amount filter
     } = filters;
 
     let matches = true;
@@ -175,6 +172,15 @@ const WhatsappCamp = () => {
     ) {
       matches = false;
     }
+    if (selectedAmount.length > 0) {
+      const paymentsCount = user.subscriptions.length;
+      if (selectedAmount.includes("one") && paymentsCount > 1) {
+        matches = false;
+      }
+      if (selectedAmount.includes("more") && paymentsCount <= 1) {
+        matches = false;
+      }
+    }
     if (amountRange.start !== "" && amountRange.end !== "") {
       const totalAmount = user.subscriptions.reduce(
         (sum, sub) => sum + sub.amount,
@@ -198,7 +204,7 @@ const WhatsappCamp = () => {
       case "Group":
         return <Group groupData={groupData} />;
       case "Scheduling":
-        return <div>Scheduling Content Here</div>;
+        return <div><Scheduling groupData={groupData} /></div>;
       default:
         return null;
     }
@@ -227,40 +233,58 @@ const WhatsappCamp = () => {
         <div className="flex justify-between items-center p-4">
           <div>
             <button
-              className="btn btn-primary mx-2 border border-black rounded-lg p-2"
+              className={`btn mx-2 border rounded-lg p-2 ${
+                currentView === "UserListing" ? "border-black font-bold" : "border-gray-300"
+              }`}
               onClick={() => setCurrentView("UserListing")}
             >
               User Listing
             </button>
             <button
-              className="btn btn-primary mx-2 border border-black rounded-lg p-2"
+              className={`btn mx-2 border rounded-lg p-2 ${
+                currentView === "Group" ? "border-black font-bold" : "border-gray-300"
+              }`}
               onClick={() => setCurrentView("Group")}
             >
               Group
             </button>
             <button
-              className="btn btn-primary mx-2 border border-black rounded-lg p-2"
+              className={`btn mx-2 border rounded-lg p-2 ${
+                currentView === "Scheduling" ? "border-black font-bold" : "border-gray-300"
+              }`}
               onClick={() => setCurrentView("Scheduling")}
             >
               Scheduling
             </button>
           </div>
-          <button
-            className="btn btn-secondary mx-2 border border-black rounded-lg p-2"
-            onClick={() => setFilterVisible(true)}
-          >
-            Filter
-          </button>
+
+          {currentView === "UserListing" && (
+            <div>
+              <button
+                className="btn btn-secondary mx-2 border border-black rounded-lg p-2"
+                onClick={() => setFilterVisible(true)}
+              >
+                Filter
+              </button>
+              <button
+                className="btn btn-secondary mx-2 border border-black rounded-lg p-2"
+                onClick={clearFilter}
+              >
+                Clear Filter
+              </button>
+            </div>
+          )}
         </div>
 
         {renderContent()}
 
         {filterVisible && (
           <Filter
-            closePopup={() => setFilterVisible(false)} // Correctly passing closePopup
+            closePopup={() => setFilterVisible(false)}
             applyFilter={applyFilter}
             clearFilter={clearFilter}
-            combinedUserData={combinedUserData} // Pass combinedUserData to Filter
+            combinedUserData={combinedUserData}
+            groupData={groupData}
           />
         )}
       </div>

@@ -1,30 +1,19 @@
 import React, { useState } from "react";
+import { FaTrashCan } from "react-icons/fa6";
+import { toast } from "react-toastify"; // Assuming you're using react-toastify for notifications
 
-const Group = ({ groupData = [] }) => {
-  // Pagination state
+const Group = ({ groupData = [], fetchGroupData }) => {
   const rowsPerPage = 100;
   const [currentPage, setCurrentPage] = useState(1);
 
   // Ensure groupData is an array and access the actual data array
   const validGroupData = Array.isArray(groupData) ? groupData : [];
 
-  // Group the users by groupName
-  const groupedData = validGroupData.reduce((acc, user) => {
-    if (!acc[user.groupName]) {
-      acc[user.groupName] = [];
-    }
-    acc[user.groupName].push(user);
-    return acc;
-  }, {});
-
-  // Convert grouped data into an array
-  const groupedArray = Object.entries(groupedData);
-
   // Calculate the total number of pages
-  const totalPages = Math.ceil(groupedArray.length / rowsPerPage);
+  const totalPages = Math.ceil(validGroupData.length / rowsPerPage);
 
   // Get the data for the current page
-  const currentData = groupedArray.slice(
+  const currentData = validGroupData.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
@@ -47,6 +36,29 @@ const Group = ({ groupData = [] }) => {
     return number.toLocaleString(); // This ensures the number displays correctly, even for large numbers
   };
 
+  // Function to delete a group by ID
+  const onDeleteGroup = async (groupId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this group?");
+    if (!confirmDelete) return;
+
+    try {
+      const response = await fetch(`http://localhost:5001/api/groups/${groupId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete the group");
+      }
+
+      toast.success("Group deleted successfully");
+      // Refetch the group data after successful deletion
+      
+    } catch (error) {
+      toast.error(`Failed to delete group: ${error.message}`);
+      console.error("Error deleting group:", error);
+    }
+  };
+
   return (
     <div className="py-4 px-8">
       <div className="table-container overflow-x-auto">
@@ -58,7 +70,6 @@ const Group = ({ groupData = [] }) => {
           <button className="border rounded-lg border-black p-2">
             Scheduling
           </button>
-         
         </div>
 
         <table className="table-list min-w-max mt-4">
@@ -73,9 +84,10 @@ const Group = ({ groupData = [] }) => {
           </thead>
           <tbody>
             {currentData.length > 0 &&
-              currentData.map(([groupName, users]) => {
+              currentData.map((group) => {
+                const { _id: groupId, groupName, users = [] } = group; // Get groupId from _id field
                 return (
-                  <tr key={groupName} className="request-numbers font-semibold">
+                  <tr key={groupId} className="request-numbers font-semibold">
                     <td style={{ textAlign: "left", paddingLeft: "2rem" }} className="p-3">
                       {new Date().toLocaleDateString()} {/* Show today's date */}
                     </td>
@@ -85,7 +97,12 @@ const Group = ({ groupData = [] }) => {
                     <td className="p-3">{formatNumber(users.length)}</td> {/* Display correct user count */}
                     <td className="p-3">{new Date().toLocaleTimeString()}</td> {/* Show current time */}
                     <td className="p-3">
-                      <button className="btn btn-primary">Action</button>
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => onDeleteGroup(groupId)} // Call the delete function with groupId
+                      >
+                        <FaTrashCan />
+                      </button>
                     </td>
                   </tr>
                 );
