@@ -17,6 +17,10 @@ const FirstAPComponent = ({ onBoardAPId }) => {
   const [status, setStatus] = useState("Pending");
 
   useEffect(() => {
+    if (onBoardAPId === "string") {
+      console.error("onBoardAPId is undefined");
+      return;
+    }
     // Fetch data from API
     const fetchData = async () => {
       try {

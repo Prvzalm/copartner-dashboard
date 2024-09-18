@@ -28,11 +28,11 @@ const APReview = () => {
         </div>
 
         {/* Render all components beneath each other */}
-        <FirstAPComponent handleNextStep={() => {}} onBoardId={onBoardAPId} />
-        <SecondAPComponent handleNextStep={() => {}} onBoardId={onBoardAPId} />
-        <ThirdAPComponent handleNextStep={() => {}} onBoardId={onBoardAPId} />
-        {/* <FourthAPComponent handleNextStep={() => {}} onBoardId={onBoardAPId} />
-        <FifthAPComponent handleNextStep={() => {}} onBoardId={onBoardAPId} /> */}
+        <FirstAPComponent handleNextStep={() => {}} onBoardAPId={onBoardAPId} />
+        <SecondAPComponent handleNextStep={() => {}} onBoardAPId={onBoardAPId} />
+        <ThirdAPComponent handleNextStep={() => {}} onBoardAPId={onBoardAPId} />
+        {/* <FourthAPComponent handleNextStep={() => {}} onBoardAPId={onBoardAPId} />
+        <FifthAPComponent handleNextStep={() => {}} onBoardAPId={onBoardAPId} /> */}
       </div>
     </div>
   );

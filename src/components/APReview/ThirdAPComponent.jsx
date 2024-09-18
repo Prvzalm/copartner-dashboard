@@ -11,6 +11,10 @@ const ThirdAPComponent = ({ onBoardAPId }) => {
 
   // Fetch data from API when component mounts
   useEffect(() => {
+    if (onBoardAPId === "string") {
+      console.error("onBoardAPId is undefined");
+      return;
+    }
     const fetchData = async () => {
       try {
         const response = await axios.get(

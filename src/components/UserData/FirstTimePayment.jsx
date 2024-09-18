@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { addDays, format } from "date-fns";
+import { addDays } from "date-fns";
 import { DateRange } from "react-date-range";
 
 const FirstTimePayment = ({ searchQuery, onTableData }) => {
   const [payments, setPayments] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [count, setCount] = useState("");
+  const [count, setCount] = useState(0);
   const [dateRange, setDateRange] = useState([
     {
       startDate: null,
@@ -14,26 +14,40 @@ const FirstTimePayment = ({ searchQuery, onTableData }) => {
     },
   ]);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1); // Track current page
+  const [totalPages, setTotalPages] = useState(0); // Track total pages
+  const [totalDataCount, setTotalDataCount] = useState(0);
+  const [loading, setLoading] = useState(false); // Track loading state
+  const pageSize = 500; // Set page size to 500
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchPayments = async () => {
+      setLoading(true); // Set loading to true when the data fetch starts
       try {
         const response = await fetch(
-          "https://copartners.in:5134/api/UserData/UserFirstTimePaymentListing?page=1&pageSize=100000"
+          `https://copartners.in:5134/api/UserData/UserFirstTimePaymentListing?page=${currentPage}&pageSize=${pageSize}`
         );
         const data = await response.json();
         if (data.isSuccess) {
-          setPayments(data.data);
+          const filteredPayments = data.data.filter(
+            (payment) => !payment.isSpecialSubscription
+          );
+          setPayments(filteredPayments);
+          setCount(filteredPayments.length);
+          setTotalDataCount(data.data[0].totalRows);
+          setTotalPages(Math.ceil(data.data[0].totalRows / pageSize)); // Calculate total pages
         } else {
           throw new Error("Failed to fetch data");
         }
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false); // Set loading to false when the data fetch completes
       }
     };
 
-    fetchData();
-  }, []);
+    fetchPayments();
+  }, [currentPage]);
 
   useEffect(() => {
     const start = dateRange[0].startDate;
@@ -42,15 +56,13 @@ const FirstTimePayment = ({ searchQuery, onTableData }) => {
     const filteredAndSortedData = payments
       .filter(
         (user) =>
-          user.mobile.includes(searchQuery) && !user.isSpecialSubscription &&
+          user.mobile.includes(searchQuery) &&
           (!start ||
             !end ||
             (new Date(user.date) >= start && new Date(user.date) <= end))
       )
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
 
     setFilteredData(filteredAndSortedData);
-    setCount(filteredAndSortedData.length);
   }, [payments, searchQuery, dateRange]);
 
   const determineUserType = (userData) => {
@@ -63,19 +75,31 @@ const FirstTimePayment = ({ searchQuery, onTableData }) => {
     }
   };
 
+  const handleNextPage = () => {
+    setCurrentPage((prevPage) => prevPage + 1);
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prevPage) => prevPage - 1);
+    }
+  };
+
   return (
     <div className="py-4 px-8">
       <div className="w-full flex flex-row-reverse">
-        <div>Count: {count}</div>
+        <div>Total Count: {totalDataCount}</div>
         <button
           onClick={() => onTableData(filteredData)}
           className="border-2 border-black rounded-lg px-4 py-1 mr-4"
+          disabled={loading} // Disable button while loading
         >
           Download Sheet
         </button>
         <button
           onClick={() => setShowDatePicker(true)}
           className="border-2 border-black rounded-lg px-4 py-1 mr-4"
+          disabled={loading} // Disable button while loading
         >
           Select Date Range
         </button>
@@ -101,36 +125,95 @@ const FirstTimePayment = ({ searchQuery, onTableData }) => {
           </div>
         </div>
       )}
-      <table className="table-list">
-        <thead>
-          <tr>
-            <th style={{ textAlign: "left", paddingLeft: "2rem" }}>Date</th>
-            <th style={{ textAlign: "left", paddingLeft: "2rem" }}>Time</th>
-            <th style={{ textAlign: "left" }}>User Number</th>
-            <th style={{ textAlign: "left" }}>Source</th>
-            <th>Name</th>
-            <th>Payment</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredData.map((payment) => (
-            <tr key={payment.userId}>
-              <td style={{ textAlign: "left", paddingLeft: "2rem" }}>
-                {new Date(payment.date).toLocaleDateString()}
-              </td>
-              <td style={{ textAlign: "left", paddingLeft: "2rem" }}>
-                {new Date(payment.date).toLocaleTimeString()}
-              </td>
-              <td style={{ textAlign: "left" }}>{payment.mobile}</td>
-              <td style={{ textAlign: "left" }}>
-                {determineUserType(payment)}
-              </td>
-              <td>{payment.name || "-"}</td>
-              <td>{payment.payment}</td>
+
+      <div className="flex justify-between items-center mt-4">
+        <button
+          onClick={handlePreviousPage}
+          disabled={currentPage === 1 || loading} // Disable button while loading
+          className={`border-2 border-black rounded-lg px-4 py-1 ${
+            currentPage === 1 || loading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+        >
+          Previous
+        </button>
+        <div>
+          Page {currentPage} of {totalPages}
+        </div>
+        <div>Count: {count}</div>
+        <button
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages || loading} // Disable button while loading
+          className={`border-2 border-black rounded-lg px-4 py-1 ${
+            currentPage === totalPages || loading
+              ? "opacity-50 cursor-not-allowed"
+              : ""
+          }`}
+        >
+          Next
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="text-center mt-4">Loading...</div> // Loading indicator
+      ) : (
+        <table className="table-list w-full mt-4">
+          <thead>
+            <tr>
+              <th style={{ textAlign: "left", paddingLeft: "2rem" }}>Date</th>
+              <th style={{ textAlign: "left", paddingLeft: "2rem" }}>Time</th>
+              <th style={{ textAlign: "left" }}>User Number</th>
+              <th style={{ textAlign: "left" }}>Source</th>
+              <th>Name</th>
+              <th>Payment</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredData.map((payment) => (
+              <tr key={payment.userId}>
+                <td style={{ textAlign: "left", paddingLeft: "2rem" }}>
+                  {new Date(payment.date).toLocaleDateString()}
+                </td>
+                <td style={{ textAlign: "left", paddingLeft: "2rem" }}>
+                  {new Date(payment.date).toLocaleTimeString()}
+                </td>
+                <td style={{ textAlign: "left" }}>{payment.mobile}</td>
+                <td style={{ textAlign: "left" }}>
+                  {determineUserType(payment)}
+                </td>
+                <td>{payment.name || "-"}</td>
+                <td>{payment.payment}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      <div className="flex justify-between items-center mt-4">
+        <button
+          onClick={handlePreviousPage}
+          disabled={currentPage === 1 || loading} // Disable button while loading
+          className={`border-2 border-black rounded-lg px-4 py-1 ${
+            currentPage === 1 || loading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+        >
+          Previous
+        </button>
+        <div>
+          Page {currentPage} of {totalPages}
+        </div>
+        <div>Count: {count}</div>
+        <button
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages || loading} // Disable button while loading
+          className={`border-2 border-black rounded-lg px-4 py-1 ${
+            currentPage === totalPages || loading
+              ? "opacity-50 cursor-not-allowed"
+              : ""
+          }`}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };

@@ -15,6 +15,10 @@ const SecondAPComponent = ({ onBoardAPId }) => {
   });
 
   useEffect(() => {
+    if (onBoardAPId === "string") {
+      console.error("onBoardAPId is undefined");
+      return;
+    }
     // Fetch data from API
     const fetchData = async () => {
       try {
