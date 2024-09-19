@@ -26,7 +26,8 @@ const CreateGroup = ({ selectedUsers, closePopup }) => {
         body: JSON.stringify({
           groupName: groupName.trim(),
           users: selectedUsers.map(user => ({
-            userId: user.userId, // Assuming user object has `userId`
+            userId: user.userId,
+            raName:user.RAname, // Assuming user object has `userId`
             name: user.name, // Assuming user object has `name`
             mobileNumber: user.mobileNumber, // Assuming user object has `mobileNumber`
           })),

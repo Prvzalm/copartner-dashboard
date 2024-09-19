@@ -97,7 +97,7 @@ const UserListing = ({ apDetails }) => {
             </small>
           </h2>
           <div className="flex space-x-4">
-            <button className="border rounded-lg border-black p-2">Send Message</button>
+            
             <button
               className="border rounded-lg border-black p-2"
               onClick={() => setShowPopup(true)}

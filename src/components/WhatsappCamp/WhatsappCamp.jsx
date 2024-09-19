@@ -7,11 +7,14 @@ import UserListing from "./UserListing";
 import Group from "./Group";
 import Filter from "./Filter";
 import Scheduling from "./Scheduling";
+import Campaign from "./Campaign";
 
 const WhatsappCamp = () => {
   const navigate = useNavigate();
   const [apDetails, setApDetails] = useState([]);
   const [groupData, setGroupData] = useState([]);
+  const [schedulingData, setSchedulingData] = useState([]);
+  const [templateData, setTemplateData] = useState([]);
   const [userDetails, setUserDetails] = useState([]);
   const [currentView, setCurrentView] = useState("UserListing");
   const [filterVisible, setFilterVisible] = useState(false);
@@ -60,6 +63,41 @@ const WhatsappCamp = () => {
     };
 
     fetchGroupData();
+  }, []);
+
+  useEffect(() => {
+    const fetchSchedulingData = async () => {
+      try {
+        const response = await fetch(`http://localhost:5001/api/schedule`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch Scheduling data");
+        }
+        const data = await response.json();
+        setSchedulingData(data); // Assuming data is an array of groups
+      } catch (error) {
+        console.error("Fetching error:", error);
+        toast.error(`Failed to fetch Schedule data: ${error.message}`);
+      }
+    };
+
+    fetchSchedulingData();
+  }, []);
+  useEffect(() => {
+    const fetchTemplateData = async () => {
+      try {
+        const response = await fetch(`http://localhost:5001/api/templates`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch template data");
+        }
+        const data = await response.json();
+        setTemplateData(data); // Assuming data is an array of groups
+      } catch (error) {
+        console.error("Fetching error:", error);
+        toast.error(`Failed to fetch template data: ${error.message}`);
+      }
+    };
+
+    fetchTemplateData();
   }, []);
 
   useEffect(() => {
@@ -204,7 +242,9 @@ const WhatsappCamp = () => {
       case "Group":
         return <Group groupData={groupData} />;
       case "Scheduling":
-        return <div><Scheduling groupData={groupData} /></div>;
+        return <div><Scheduling schedulingData={schedulingData} /></div>;
+      case "Campaign":
+        return <div> <Campaign templateData={templateData} /></div>;
       default:
         return null;
     }
@@ -255,6 +295,14 @@ const WhatsappCamp = () => {
               onClick={() => setCurrentView("Scheduling")}
             >
               Scheduling
+            </button>
+            <button
+              className={`btn mx-2 border rounded-lg p-2 ${
+                currentView === "Campaign" ? "border-black font-bold" : "border-gray-300"
+              }`}
+              onClick={() => setCurrentView("Campaign")}
+            >
+              Campaign Temp.
             </button>
           </div>
 
