@@ -50,11 +50,13 @@ const WhatsappCamp = () => {
   useEffect(() => {
     const fetchGroupData = async () => {
       try {
-        const response = await fetch(`http://localhost:5001/api/groups`);
+        const response = await fetch(`https://whatsapp.copartner.in/api/groups`);
+        
         if (!response.ok) {
           throw new Error("Failed to fetch group data");
         }
         const data = await response.json();
+        console.log(data);
         setGroupData(data); // Assuming data is an array of groups
       } catch (error) {
         console.error("Fetching error:", error);
@@ -68,7 +70,7 @@ const WhatsappCamp = () => {
   useEffect(() => {
     const fetchSchedulingData = async () => {
       try {
-        const response = await fetch(`http://localhost:5001/api/schedule`);
+        const response = await fetch(`https://whatsapp.copartner.in/api/schedule`);
         if (!response.ok) {
           throw new Error("Failed to fetch Scheduling data");
         }
@@ -85,7 +87,7 @@ const WhatsappCamp = () => {
   useEffect(() => {
     const fetchTemplateData = async () => {
       try {
-        const response = await fetch(`http://localhost:5001/api/templates`);
+        const response = await fetch(`https://whatsapp.copartner.in/api/templates`);
         if (!response.ok) {
           throw new Error("Failed to fetch template data");
         }
@@ -116,10 +118,10 @@ const WhatsappCamp = () => {
           return {
             userId,
             subscriptions: subscriberData.data.map((sub) => ({
-              amount: sub.totalAmount || 0,
-              RAname: sub.subscription.experts.name || "N/A",
-              planType: sub.subscription.planType || "N/A",
-              serviceType: sub.subscription.serviceType || "N/A",
+              amount: sub?.totalAmount || 0,
+              RAname: sub?.subscription.experts.name || "N/A",
+              planType: sub?.subscription.planType || "N/A",
+              serviceType: sub?.subscription.serviceType || "N/A",
             })),
           };
         } catch (error) {

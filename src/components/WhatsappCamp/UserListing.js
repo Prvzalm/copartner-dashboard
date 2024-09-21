@@ -21,27 +21,53 @@ const UserListing = ({ apDetails }) => {
   };
 
   // Toggle checkbox for individual users
-  const handleCheckboxChange = (user) => {
-    const userExists = selectedUsers.find((u) => u.userId === user.id);
-    if (userExists) {
-      setSelectedUsers(selectedUsers.filter((u) => u.userId !== user.id));
-    } else {
-      setSelectedUsers([
-        ...selectedUsers,
-        { userId: user.id, name: user.name, mobileNumber: user.mobileNumber },
-      ]);
-    }
-  };
+ // Toggle checkbox for individual users
+// Toggle checkbox for individual users
+// Toggle checkbox for individual users
+const handleCheckboxChange = (user) => {
+  console.log('User selected:', user);  // Log user data to verify what you receive
+
+  // Safely access the `raName` from the subscriptions array
+  const raName = user.subscriptions && user.subscriptions.length > 0
+    ? user.subscriptions[0].RAname
+    : 'N/A';  // Fallback if no RAname is found
+
+  const userExists = selectedUsers.find((u) => u.userId === user.id);
+
+  if (userExists) {
+    setSelectedUsers(selectedUsers.filter((u) => u.userId !== user.id));
+  } else {
+    setSelectedUsers([
+      ...selectedUsers,
+      {
+        userId: user.id,
+        raName: raName,  
+        name: user.name,
+        mobileNumber: user.mobileNumber,
+      },
+    ]);
+  }
+
+  // Log the updated selectedUsers state to ensure the raName is properly added
+  console.log('Updated selectedUsers:', selectedUsers);
+};
+
+
+
 
   // Select or Deselect all users on the current page
   const handleSelectAll = () => {
     if (selectAll) {
       setSelectedUsers([]); // Deselect all
     } else {
+      
       const usersToSelect = currentData.map((user) => ({
+        
         userId: user.id,
+        raName: user.subscriptions && user.subscriptions.length > 0 ? user.subscriptions[0].RAname : "N/A",
         name: user.name,
         mobileNumber: user.mobileNumber,
+        
       }));
       setSelectedUsers(usersToSelect);
     }
@@ -89,23 +115,23 @@ const UserListing = ({ apDetails }) => {
   return (
     <div className="py-4 px-8">
       <div className="table-container overflow-x-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="pl-3 text-xl font-semibold">
-            User Listing
-            <small className="ml-2 text-sm font-light">
-              ({filteredUsersCount} total users, {usersOnCurrentPageCount} on this page)
-            </small>
-          </h2>
-          <div className="flex space-x-4">
-            
-            <button
-              className="border rounded-lg border-black p-2"
-              onClick={() => setShowPopup(true)}
-            >
-              Create Group
-            </button>
-          </div>
-        </div>
+      <div className="flex justify-between items-center mb-4">
+  <h2 className="pl-3 text-xl font-semibold whitespace-nowrap">
+    User Listing
+    <small className="ml-2 text-sm font-light">
+      ({apDetails.length} total users, {currentData.length} on this page)
+    </small>
+  </h2>
+  <div className="ml-auto">
+    <button
+      className="border rounded-lg border-black p-2"
+      onClick={() => setShowPopup(true)}
+    >
+      Create Group
+    </button>
+  </div>
+</div>
+
 
         <table className="table-list min-w-max">
           <thead>

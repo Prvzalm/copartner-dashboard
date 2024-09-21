@@ -18,7 +18,7 @@ const CreateSchedule = ({ closePopup }) => {
   // Fetch groups from the API
   const fetchGroups = async () => {
     try {
-      const response = await axios.get(`http://localhost:5001/api/groups?page=${groupPage}&limit=5`);
+      const response = await axios.get(`https://whatsapp.copartner.in/api/groups?page=${groupPage}&limit=5`);
       setGroups((prev) => [...prev, ...response.data]); // Append new groups
     } catch (error) {
       console.error('Error fetching groups:', error);
@@ -28,7 +28,7 @@ const CreateSchedule = ({ closePopup }) => {
   // Fetch templates from the API
   const fetchTemplates = async () => {
     try {
-      const response = await axios.get(`http://localhost:5001/api/templates?page=${templatePage}&limit=5`);
+      const response = await axios.get(`https://whatsapp.copartner.in/api/templates?page=${templatePage}&limit=5`);
       setTemplates((prev) => [...prev, ...response.data]); // Append new templates
     } catch (error) {
       console.error('Error fetching templates:', error);
@@ -45,7 +45,7 @@ const CreateSchedule = ({ closePopup }) => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post('http://localhost:5001/api/schedule', {
+      const response = await axios.post('https://whatsapp.copartner.in/api/schedule', {
         groupId,
         templateId,
         scheduledTime: selectedDate,

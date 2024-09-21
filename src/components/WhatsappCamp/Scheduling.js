@@ -14,7 +14,7 @@ const Scheduling = () => {
   // Fetch schedules from the backend
   const fetchScheduleData = async () => {
     try {
-      const response = await axios.get("http://localhost:5001/api/schedule");
+      const response = await axios.get("https://whatsapp.copartner.in/api/schedule");
       setSchedulingData(response.data);
     } catch (error) {
       console.error("Error fetching schedules:", error);
@@ -27,7 +27,7 @@ const Scheduling = () => {
     const templateNamePromises = uniqueTemplateIds.map(async (templateId) => {
       if (!templateNames[templateId]) { // Fetch only if not already in state
         try {
-          const response = await axios.get(`http://localhost:5001/api/templates/${templateId}`);
+          const response = await axios.get(`https://whatsapp.copartner.in/api/templates/${templateId}`);
           return { [templateId]: response.data.name }; // Assuming template name is in response.data.name
         } catch (error) {
           console.error(`Error fetching template ${templateId}:`, error);
@@ -52,10 +52,15 @@ const Scheduling = () => {
 
   // Group schedules by groupName and sort by `scheduledTime`
   const groupedData = validGroupData.reduce((acc, group) => {
-    if (!acc[group.groupId.groupName]) {
-      acc[group.groupId.groupName] = [];
+    // Check if groupId exists and has groupName
+    if (group.groupId && group.groupId.groupName) {
+      if (!acc[group.groupId.groupName]) {
+        acc[group.groupId.groupName] = [];
+      }
+      acc[group.groupId.groupName].push(group);
+    } else {
+      console.warn(`Missing groupId or groupName for group with id: ${group._id}`);
     }
-    acc[group.groupId.groupName].push(group);
     return acc;
   }, {});
 
@@ -134,8 +139,11 @@ const Scheduling = () => {
   };
 
   // Handle closing the popup
-  const handleClosePopup = () => {
+  const handleClosePopup = (shouldFetchData = false) => {
     setShowPopup(false);
+    if (shouldFetchData) {
+      fetchScheduleData(); // Refetch data after adding a schedule
+    }
   };
 
   // Handle deletion of schedule
@@ -144,7 +152,7 @@ const Scheduling = () => {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`http://localhost:5001/api/schedule/${scheduleId}`);
+      await axios.delete(`https://whatsapp.copartner.in/api/schedule/${scheduleId}`);
       alert("Schedule deleted successfully");
       fetchScheduleData(); // Refetch data after deletion
     } catch (error) {
@@ -185,10 +193,10 @@ const Scheduling = () => {
                       style={{ textAlign: "left", paddingLeft: "2rem" }}
                       className="p-3"
                     >
-                      {schedules[0].groupId.dateCreatedOn || "N/A"} {/* Show the date created */}
+                      {schedules[0].groupId?.dateCreatedOn || "N/A"} {/* Show the date created */}
                     </td>
                     <td style={{ textAlign: "left" }} className="p-3">
-                      {groupName || "N/A"} {/* Show group name */}
+                      {groupName || "Unnamed Group"} {/* Show group name or fallback */}
                     </td>
                     <td className="p-3"></td> {/* Empty cells for group row */}
                     <td className="p-3"></td>
@@ -261,7 +269,7 @@ const Scheduling = () => {
 
       {/* Popup for adding new schedule */}
       {showPopup && (
-        <CreateSchedule closePopup={handleClosePopup} fetchScheduleData={fetchScheduleData} /> 
+        <CreateSchedule closePopup={() => handleClosePopup(true)} fetchScheduleData={fetchScheduleData} /> 
       )}
     </div>
   );

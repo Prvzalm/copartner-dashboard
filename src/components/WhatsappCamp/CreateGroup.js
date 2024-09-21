@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 const CreateGroup = ({ selectedUsers, closePopup }) => {
   const [groupName, setGroupName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false); // To handle the loading state
-
+console.log(selectedUsers)
   const handleSubmit = async () => {
     if (!groupName.trim()) {
       alert('Please enter a group name');
@@ -18,7 +18,7 @@ const CreateGroup = ({ selectedUsers, closePopup }) => {
     setIsSubmitting(true); // Set loading state
 
     try {
-      const response = await fetch('http://localhost:5001/api/groups', {
+      const response = await fetch('https://whatsapp.copartner.in/api/groups', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -27,7 +27,7 @@ const CreateGroup = ({ selectedUsers, closePopup }) => {
           groupName: groupName.trim(),
           users: selectedUsers.map(user => ({
             userId: user.userId,
-            raName:user.RAname, // Assuming user object has `userId`
+            raName:user.raName, // Assuming user object has `userId`
             name: user.name, // Assuming user object has `name`
             mobileNumber: user.mobileNumber, // Assuming user object has `mobileNumber`
           })),

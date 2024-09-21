@@ -62,7 +62,7 @@ const CreateTemplate = ({ closePopup }) => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post('http://localhost:5001/api/templates', templateData);
+      const response = await axios.post('https://whatsapp.copartner.in/api/templates', templateData);
       if (response.status === 200) {
         alert('Template saved successfully');
         closePopup(); // Close the popup after success

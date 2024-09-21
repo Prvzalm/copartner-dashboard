@@ -41,7 +41,7 @@ const Campaign = ({ templateData = [], fetchTemplateData }) => {
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`http://localhost:5001/api/templates/${templateId}`, {
+      const response = await fetch(`https://whatsapp.copartner.in/api/templates/${templateId}`, {
         method: "DELETE",
       });
 
@@ -91,11 +91,13 @@ const Campaign = ({ templateData = [], fetchTemplateData }) => {
           <tbody>
             {currentData.length > 0 &&
               currentData.map((group) => {
-                const { _id: templateId, name, dateCreatedOn, campaignName } = group; // Get templateId from _id field
+                const { _id: templateId, name, dateCreated, campaignName } = group;
+               const  newDate = new Date(dateCreated);
+               const formattedDate = newDate.toLocaleDateString(); // Get templateId from _id field
                 return (
                   <tr key={templateId} className="request-numbers font-semibold">
                     <td style={{ textAlign: "left", paddingLeft: "2rem" }} className="p-3">
-                      {dateCreatedOn || "N/A"} {/* Show the date the template was created */}
+                      {formattedDate || "N/A"} {/* Show the date the template was created */}
                     </td>
                     <td style={{ textAlign: "left" }} className="p-3">
                       {name || "N/A"} {/* Show the template name */}

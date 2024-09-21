@@ -36,13 +36,13 @@ const Group = ({ groupData = [], fetchGroupData }) => {
     return number.toLocaleString(); // This ensures the number displays correctly, even for large numbers
   };
 
-  // Function to delete a group by ID
+  // Function to delete a group by ID and refresh the data after deletion
   const onDeleteGroup = async (groupId) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this group?");
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`http://localhost:5001/api/groups/${groupId}`, {
+      const response = await fetch(`https://whatsapp.copartner.in/api/groups/${groupId}`, {
         method: "DELETE",
       });
 
@@ -51,8 +51,9 @@ const Group = ({ groupData = [], fetchGroupData }) => {
       }
 
       toast.success("Group deleted successfully");
+
       // Refetch the group data after successful deletion
-      
+      fetchGroupData();
     } catch (error) {
       toast.error(`Failed to delete group: ${error.message}`);
       console.error("Error deleting group:", error);
@@ -63,10 +64,6 @@ const Group = ({ groupData = [], fetchGroupData }) => {
     <div className="py-4 px-8">
       <div className="table-container overflow-x-auto">
         <h2 className="pl-3 text-xl font-semibold">Group Data</h2>
-        <div className="flex justify-end space-x-4">
-       
-        
-        </div>
 
         <table className="table-list min-w-max mt-4">
           <thead>
