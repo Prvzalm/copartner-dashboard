@@ -60,7 +60,7 @@ const ThirdComponent = ({ handleNextStep, onBoardId }) => {
             className="px-4 py-2 border rounded-lg bg-white shadow-sm"
           >
             <option value="Pending">Pending</option>
-            <option value="Accepted">Complete</option>
+            <option value="Complete">Complete</option>
             <option value="Rejected">Rejected</option>
           </select>
         </div>

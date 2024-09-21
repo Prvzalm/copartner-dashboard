@@ -1,23 +1,20 @@
-import React, { useEffect, useState } from "react";
-import FirstComponent from "./FirstComponent";
-import { FaAngleLeft } from "react-icons/fa6";
+import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PageHeader from "../Header/Header";
-import SecondComponent from "./SecondComponent";
-import ThirdComponent from "./ThirdComponent";
-import FourthComponent from "./FourthComponent";
-import FifthComponent from "./FifthComponent";
+import { FaAngleLeft } from "react-icons/fa6";
+import FirstAPComponent from "./FirstAPComponent.jsx";
+import SecondAPComponent from "./SecondAPComponent.jsx";
+import ThirdAPComponent from "./ThirdAPComponent.jsx";
 
-const RAReview = () => {
-  const { onBoardId } = useParams();
+const APReview = () => {
+  const { onBoardAPId } = useParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [hasNotification, setHasNotification] = useState(true);
   const navigate = useNavigate();
-
   return (
     <div className="dashboard-container p-0 sm:ml-60">
       <PageHeader
-        title="R.A Onboarding"
+        title="A.P Onboarding"
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         setHasNotification={setHasNotification}
@@ -31,14 +28,14 @@ const RAReview = () => {
         </div>
 
         {/* Render all components beneath each other */}
-        <FirstComponent handleNextStep={() => {}} onBoardId={onBoardId} />
-        <SecondComponent handleNextStep={() => {}} onBoardId={onBoardId} />
-        <ThirdComponent handleNextStep={() => {}} onBoardId={onBoardId} />
-        <FourthComponent handleNextStep={() => {}} onBoardId={onBoardId} />
-        <FifthComponent handleNextStep={() => {}} onBoardId={onBoardId} />
+        <FirstAPComponent handleNextStep={() => {}} onBoardAPId={onBoardAPId} />
+        <SecondAPComponent handleNextStep={() => {}} onBoardAPId={onBoardAPId} />
+        <ThirdAPComponent handleNextStep={() => {}} onBoardAPId={onBoardAPId} />
+        {/* <FourthAPComponent handleNextStep={() => {}} onBoardAPId={onBoardAPId} />
+        <FifthAPComponent handleNextStep={() => {}} onBoardAPId={onBoardAPId} /> */}
       </div>
     </div>
   );
 };
 
-export default RAReview;
+export default APReview;

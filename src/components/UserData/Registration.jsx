@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { addDays, format } from "date-fns";
+import { addDays } from "date-fns";
 import { DateRange } from "react-date-range";
 
 const Registration = ({ searchQuery, onTableData }) => {
   const [userData, setUserData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [count, setCount] = useState("");
+  const [count, setCount] = useState(0);
   const [dateRange, setDateRange] = useState([
     {
       startDate: null,
@@ -14,12 +14,18 @@ const Registration = ({ searchQuery, onTableData }) => {
     },
   ]);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1); // Track current page
+  const [totalPages, setTotalPages] = useState(0); // Track total pages
+  const [totalDataCount, setTotalDataCount] = useState(0);
+  const [loading, setLoading] = useState(false); // Track loading state
+  const pageSize = 500; // Set page size to 500
 
   useEffect(() => {
     const fetchUserData = async () => {
+      setLoading(true); // Start loading
       try {
         const response = await fetch(
-          "https://copartners.in:5134/api/UserData/UserDataListing?page=1&pageSize=100000"
+          `https://copartners.in:5134/api/UserData/UserDataListing?page=${currentPage}&pageSize=${pageSize}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch user data");
@@ -27,16 +33,21 @@ const Registration = ({ searchQuery, onTableData }) => {
         const data = await response.json();
         if (data.isSuccess) {
           setUserData(data.data);
+          setCount(data.data.length); // Assuming API provides total count
+          setTotalDataCount(data.data[0].totalRows);
+          setTotalPages(Math.ceil(data.data[0].totalRows / pageSize)); // Calculate total pages
         } else {
           throw new Error("Failed to fetch user data");
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
+      } finally {
+        setLoading(false); // Stop loading
       }
     };
 
     fetchUserData();
-  }, []);
+  }, [currentPage]);
 
   useEffect(() => {
     const start = dateRange[0].startDate;
@@ -50,10 +61,8 @@ const Registration = ({ searchQuery, onTableData }) => {
             !end ||
             (new Date(user.date) >= start && new Date(user.date) <= end))
       )
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
 
     setFilteredData(filteredAndSortedData);
-    setCount(filteredAndSortedData.length);
   }, [userData, searchQuery, dateRange]);
 
   const determineUserType = (userData) => {
@@ -66,19 +75,31 @@ const Registration = ({ searchQuery, onTableData }) => {
     }
   };
 
+  const handleNextPage = () => {
+    setCurrentPage((prevPage) => prevPage + 1);
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prevPage) => prevPage - 1);
+    }
+  };
+
   return (
     <div className="py-4 px-8">
       <div className="w-full flex flex-row-reverse">
-        <div>Count: {count}</div>
+        <div>Total Count: {totalDataCount}</div>
         <button
           onClick={() => onTableData(filteredData)}
           className="border-2 border-black rounded-lg px-4 py-1 mr-4"
+          disabled={loading} // Disable while loading
         >
           Download Sheet
         </button>
         <button
           onClick={() => setShowDatePicker(true)}
           className="border-2 border-black rounded-lg px-4 py-1 mr-4"
+          disabled={loading} // Disable while loading
         >
           Select Date Range
         </button>
@@ -104,32 +125,91 @@ const Registration = ({ searchQuery, onTableData }) => {
           </div>
         </div>
       )}
-      <table className="table-list w-full mt-4">
-        <thead>
-          <tr>
-            <th className="text-left pl-8">Date</th>
-            <th className="text-left pl-8">Time</th>
-            <th className="text-left">User Number</th>
-            <th className="text-left">Source</th>
-            <th>Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredData.map((user) => (
-            <tr key={user.userId}>
-              <td className="text-left pl-8">
-                {new Date(user.date).toLocaleDateString()}
-              </td>
-              <td className="text-left pl-8">
-                {new Date(user.date).toLocaleTimeString()}
-              </td>
-              <td className="text-left">{user.mobile}</td>
-              <td className="text-left">{determineUserType(user)}</td>
-              <td>{user.name || "-"}</td>
+
+      <div className="flex justify-between items-center mt-4">
+        <button
+          onClick={handlePreviousPage}
+          disabled={currentPage === 1 || loading} // Disable while loading
+          className={`border-2 border-black rounded-lg px-4 py-1 ${
+            currentPage === 1 || loading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+        >
+          Previous
+        </button>
+        <div>
+          Page {currentPage} of {totalPages}
+        </div>
+        <div>Count: {count}</div>
+        <button
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages || loading} // Disable while loading
+          className={`border-2 border-black rounded-lg px-4 py-1 ${
+            currentPage === totalPages || loading
+              ? "opacity-50 cursor-not-allowed"
+              : ""
+          }`}
+        >
+          Next
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="text-center mt-4">Loading...</div> // Show loading indicator
+      ) : (
+        <table className="table-list w-full mt-4">
+          <thead>
+            <tr>
+              <th className="text-left pl-8">Date</th>
+              <th className="text-left pl-8">Time</th>
+              <th className="text-left">User Number</th>
+              <th className="text-left">Source</th>
+              <th>Name</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredData.map((user) => (
+              <tr key={user.userId}>
+                <td className="text-left pl-8">
+                  {new Date(user.date).toLocaleDateString()}
+                </td>
+                <td className="text-left pl-8">
+                  {new Date(user.date).toLocaleTimeString()}
+                </td>
+                <td className="text-left">{user.mobile}</td>
+                <td className="text-left">{determineUserType(user)}</td>
+                <td>{user.name || "-"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      <div className="flex justify-between items-center mt-4">
+        <button
+          onClick={handlePreviousPage}
+          disabled={currentPage === 1 || loading} // Disable while loading
+          className={`border-2 border-black rounded-lg px-4 py-1 ${
+            currentPage === 1 || loading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+        >
+          Previous
+        </button>
+        <div>
+          Page {currentPage} of {totalPages}
+        </div>
+        <div>Count: {count}</div>
+        <button
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages || loading} // Disable while loading
+          className={`border-2 border-black rounded-lg px-4 py-1 ${
+            currentPage === totalPages || loading
+              ? "opacity-50 cursor-not-allowed"
+              : ""
+          }`}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };
