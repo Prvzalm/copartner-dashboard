@@ -71,12 +71,16 @@ const Campaign = ({ templateData = [], fetchTemplateData }) => {
 
   return (
     <div className="py-4 px-8">
-      <div className="table-container overflow-x-auto">
-        <h2 className="pl-3 text-xl font-semibold">Template Listing</h2>
-        <div className="flex justify-end space-x-4">
-          <button className="border rounded-lg border-black p-2" onClick={handleOpenPopup}>
+      <div className="flex justify-between">
+      <h2 className="pl-3 text-xl font-semibold">Template Listing</h2>
+      <button className="border rounded-lg border-black p-2" onClick={handleOpenPopup}>
             +Add
           </button>
+      </div>
+      <div className="table-container overflow-x-auto">
+       
+        <div className="flex justify-end space-x-4">
+         
         </div>
 
         <table className="table-list min-w-max mt-4">
@@ -126,17 +130,17 @@ const Campaign = ({ templateData = [], fetchTemplateData }) => {
       {/* Pagination controls */}
       <div className="pagination-controls mt-4 flex justify-center items-center">
         <button
-          className="btn btn-primary mx-2"
+          className="btn btn-primary mx-2 border border-black rounded-lg p-1"
           onClick={handlePreviousPage}
           disabled={currentPage === 1}
         >
-          Previous
+          Prev
         </button>
         <span className="mx-2">
           Page {currentPage} of {totalPages}
         </span>
         <button
-          className="btn btn-primary mx-2"
+          className="btn btn-primary mx-2 border border-black rounded-lg p-1"
           onClick={handleNextPage}
           disabled={currentPage === totalPages}
         >

@@ -256,7 +256,7 @@ const WhatsappCamp = () => {
   return (
     <div className="dashboard-container p-0 sm:ml-60">
       <PageHeader
-        title="Whatsapp Camp."
+        title="Whatsapp Campaign."
         searchQuery=""
         setSearchQuery={() => {}}
         hasNotification={false}
@@ -336,6 +336,8 @@ const WhatsappCamp = () => {
             clearFilter={clearFilter}
             combinedUserData={combinedUserData}
             groupData={groupData}
+            initialFilters={filters || {}}  // Pass the stored filters as initialFilters
+
           />
         )}
       </div>

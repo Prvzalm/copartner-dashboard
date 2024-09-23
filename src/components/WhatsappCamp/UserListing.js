@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import CreateGroup from './CreateGroup';
 
 const UserListing = ({ apDetails }) => {
@@ -114,21 +115,25 @@ const handleCheckboxChange = (user) => {
 
   return (
     <div className="py-4 px-8">
-      <div className="table-container overflow-x-auto">
-      <div className="flex justify-between items-center mb-4">
-  <h2 className="pl-3 text-xl font-semibold whitespace-nowrap">
+      <div className='flex justify-between'>
+      <h2 className="pl-3 text-xl font-semibold whitespace-nowrap">
     User Listing
     <small className="ml-2 text-sm font-light">
       ({apDetails.length} total users, {currentData.length} on this page)
     </small>
   </h2>
-  <div className="ml-auto">
-    <button
+  <button
       className="border rounded-lg border-black p-2"
       onClick={() => setShowPopup(true)}
     >
       Create Group
     </button>
+      </div>
+      <div className="table-container overflow-x-auto">
+      <div className="flex justify-between items-center mb-4">
+  
+  <div className="ml-auto">
+    
   </div>
 </div>
 
@@ -239,17 +244,17 @@ const handleCheckboxChange = (user) => {
       {/* Pagination controls */}
       <div className="pagination-controls mt-4 flex justify-center items-center">
         <button
-          className="btn btn-primary mx-2"
+          className="btn btn-primary mx-2 border border-black rounded-lg p-1"
           onClick={handlePreviousPage}
           disabled={currentPage === 1}
         >
-          Previous
+          Prev
         </button>
         <span className="mx-2">
           Page {currentPage} of {totalPages}
         </span>
         <button
-          className="btn btn-primary mx-2"
+          className="btn btn-primary mx-2 border border-black rounded-lg p-1"
           onClick={handleNextPage}
           disabled={currentPage === totalPages}
         >
