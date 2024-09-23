@@ -78,22 +78,24 @@ const Filter = ({ combinedUserData, groupData, applyFilter, closePopup, initialF
   };
 
   useEffect(() => {
+    const filters = initialFilters || {}; // Use an empty object as a fallback
+  
     if (isFirstLoad.current) {
-      setSelectedKYC(initialFilters.selectedKYC || []);
-      setSelectedReferralMode(initialFilters.selectedReferralMode || []);
-      setSelectedLandingUrl(initialFilters.selectedLandingUrl || []);
-      setSelectedSubscription(initialFilters.selectedSubscription || []);
-      setSelectedSubscriptionType(initialFilters.selectedSubscriptionType || []);
-      setSelectedRAName(initialFilters.selectedRAName || []);
-      setAmountRange(initialFilters.amountRange || { start: "", end: "" });
-      setSelectedAmount(initialFilters.selectedAmount || []);
-      setSelectedGroup(initialFilters.selectedGroup || []);
-      setStartDate(initialFilters.startDate || "");
-      setEndDate(initialFilters.endDate || "");
+      setSelectedKYC(filters.selectedKYC || []); // Use 'filters' instead of 'initialFilters'
+      setSelectedReferralMode(filters.selectedReferralMode || []);
+      setSelectedLandingUrl(filters.selectedLandingUrl || []);
+      setSelectedSubscription(filters.selectedSubscription || []);
+      setSelectedSubscriptionType(filters.selectedSubscriptionType || []);
+      setSelectedRAName(filters.selectedRAName || []);
+      setAmountRange(filters.amountRange || { start: "", end: "" });
+      setSelectedAmount(filters.selectedAmount || []);
+      setSelectedGroup(filters.selectedGroup || []);
+      setStartDate(filters.startDate || "");
+      setEndDate(filters.endDate || "");
       isFirstLoad.current = false;
     }
   }, [initialFilters]);
-
+  
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white p-8 rounded shadow-lg w-2/3 relative">
