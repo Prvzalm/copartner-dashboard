@@ -194,7 +194,10 @@ const Scheduling = () => {
                       style={{ textAlign: "left", paddingLeft: "2rem" }}
                       className="p-3"
                     >
-                      {schedules[0].groupId?.dateCreatedOn || "N/A"} {/* Show the date created */}
+                     {schedules[0]?.groupId?.dateCreatedOn 
+  ? new Date(schedules[0].groupId.dateCreatedOn).toLocaleDateString() 
+  : "N/A"}
+ {/* Show the date created */}
                     </td>
                     <td style={{ textAlign: "left" }} className="p-3">
                       {groupName || "Unnamed Group"} {/* Show group name or fallback */}

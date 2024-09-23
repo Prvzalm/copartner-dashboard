@@ -84,9 +84,14 @@ const Group = ({ groupData = [], fetchGroupData }) => {
             {currentData.length > 0 &&
               currentData.map((group) => {
                 const { _id: groupId, groupName, users = [], dateCreatedOn } = group; 
-                const time = new Date(dateCreatedOn).toLocaleTimeString();
-                const  newDate = new Date(dateCreatedOn);
-               const formattedDate = newDate.toLocaleDateString();
+                    // Ensure dateCreatedOn is a valid date before formatting
+    const newDate = dateCreatedOn ? new Date(dateCreatedOn) : null;
+
+    // Format the time (e.g., 17:23:00 for 24-hour format or 5:23:00 PM for 12-hour format)
+    const time = newDate ? newDate.toLocaleTimeString('en-GB', { hour12: false }) : "N/A";
+    
+    // Format the date (e.g., 2024-09-23 in ISO format)
+    const formattedDate = newDate ? newDate.toISOString().split('T')[0] : "N/A";
                 console.log(time);// Get groupId from _id field
                 return (
                   <tr key={groupId} className="request-numbers font-semibold">
