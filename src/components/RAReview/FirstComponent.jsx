@@ -68,7 +68,7 @@ const FirstComponent = ({ handleNextStep, onBoardId }) => {
             className="px-4 py-2 border rounded-lg bg-white shadow-sm"
           >
             <option value="Pending">Pending</option>
-            <option value="Accepted">Complete</option>
+            <option value="Complete">Complete</option>
             <option value="Rejected">Rejected</option>
           </select>
         </div>
@@ -82,11 +82,11 @@ const FirstComponent = ({ handleNextStep, onBoardId }) => {
               <img
                 src={profileImage}
                 alt="Profile"
-                className="h-32 w-32 object-cover rounded-full"
+                className="h-[400px] w-full object-cover"
               />
             ) : (
               <label className="text-gray-400 cursor-pointer">
-                <div className="h-32 w-32 border-dashed flex items-center justify-center rounded-full">
+                <div className="h-32 w-48 border-dashed flex items-center justify-center rounded-full">
                   Profile Image
                 </div>
                 {/* <input
@@ -102,7 +102,7 @@ const FirstComponent = ({ handleNextStep, onBoardId }) => {
 
         <div className="text-center">
           <p className="text-lg font-medium mb-2">SEBI Certificate</p>
-          <div className="border border-gray-300 bg-gray-100 rounded-lg p-6 flex justify-center items-center">
+          <div className="border border-gray-300 bg-gray-100 rounded-lg p-6">
             {sebiCertificate ? (
               <div className="flex flex-col items-center">
               <object
@@ -119,7 +119,7 @@ const FirstComponent = ({ handleNextStep, onBoardId }) => {
             </div>
             ) : (
               <label className="text-gray-400 cursor-pointer">
-                <div className="h-32 w-48 border-dashed flex items-center justify-center">
+                <div className="h-32 w-48 border-dashed mx-auto">
                   Upload Your Certificate
                 </div>
                 {/* <input
