@@ -46,23 +46,23 @@ const WhatsappCamp = () => {
 
     fetchAPDetails();
   }, []);
-
-  useEffect(() => {
-    const fetchGroupData = async () => {
-      try {
-        const response = await fetch(`https://whatsapp.copartner.in/api/groups`);
-        
-        if (!response.ok) {
-          throw new Error("Failed to fetch group data");
-        }
-        const data = await response.json();
-        console.log(data);
-        setGroupData(data); // Assuming data is an array of groups
-      } catch (error) {
-        console.error("Fetching error:", error);
-        toast.error(`Failed to fetch group data: ${error.message}`);
+  const fetchGroupData = async () => {
+    try {
+      const response = await fetch(`https://whatsapp.copartner.in/api/groups`);
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch group data");
       }
-    };
+      const data = await response.json();
+      console.log(data);
+      setGroupData(data); // Assuming data is an array of groups
+    } catch (error) {
+      console.error("Fetching error:", error);
+      toast.error(`Failed to fetch group data: ${error.message}`);
+    }
+  };
+  useEffect(() => {
+   
 
     fetchGroupData();
   }, []);
@@ -243,7 +243,7 @@ const WhatsappCamp = () => {
       case "UserListing":
         return <UserListing apDetails={filteredUserData} />;
       case "Group":
-        return <Group groupData={groupData} />;
+        return <Group groupData={groupData} fetchGroupData={fetchGroupData} />;
       case "Scheduling":
         return <div><Scheduling schedulingData={schedulingData} /></div>;
       case "Campaign":
