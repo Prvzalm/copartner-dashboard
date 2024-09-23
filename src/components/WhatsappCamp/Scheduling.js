@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios"; // Import axios to make API requests
 import CreateSchedule from "./CreateSchedule";
 import { FaTrashAlt } from "react-icons/fa";
+import Bin from "../../assets/TrashBinMinimalistic.png";
 
 const Scheduling = () => {
   const rowsPerPage = 100; // Define how many rows per page
@@ -231,10 +232,15 @@ const Scheduling = () => {
                         </td>
                         <td className="p-3">
                           <button
-                            onClick={() => handleDeleteSchedule(scheduleId)} // Call API to delete schedule
+                             // Call API to delete schedule
                             className="text-red-500 hover:text-red-700 focus:outline-none"
                           >
-                            <FaTrashAlt />
+                            <img
+                          className="w-6 h-6 cursor-pointer"
+                          src={Bin}
+                          alt="Delete"
+                          onClick={() => handleDeleteSchedule(scheduleId)}
+                        />
                           </button>
                         </td>
                       </tr>

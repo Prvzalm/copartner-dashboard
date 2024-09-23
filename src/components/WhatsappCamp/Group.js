@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FaTrashCan } from "react-icons/fa6";
+import Bin from "../../assets/TrashBinMinimalistic.png";
 import { toast } from "react-toastify"; // Assuming you're using react-toastify for notifications
 
 const Group = ({ groupData = [], fetchGroupData }) => {
@@ -17,6 +18,7 @@ const Group = ({ groupData = [], fetchGroupData }) => {
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
+  
 
   // Handle pagination controls
   const handleNextPage = () => {
@@ -78,23 +80,31 @@ const Group = ({ groupData = [], fetchGroupData }) => {
           <tbody>
             {currentData.length > 0 &&
               currentData.map((group) => {
-                const { _id: groupId, groupName, users = [], dateCreatedOn } = group; // Get groupId from _id field
+                const { _id: groupId, groupName, users = [], dateCreatedOn } = group; 
+                const time = new Date(dateCreatedOn).toLocaleTimeString();
+                const  newDate = new Date(dateCreatedOn);
+               const formattedDate = newDate.toLocaleDateString();
+                console.log(time);// Get groupId from _id field
                 return (
                   <tr key={groupId} className="request-numbers font-semibold">
                     <td style={{ textAlign: "left", paddingLeft: "2rem" }} className="p-3">
-                      {dateCreatedOn || "N/A"} {/* Show today's date */}
+                      {formattedDate || "N/A"} {/* Show today's date */}
                     </td>
                     <td style={{ textAlign: "left" }} className="p-3">
                       {groupName || "N/A"}
                     </td>
                     <td className="p-3">{formatNumber(users.length)}</td> {/* Display correct user count */}
-                    <td className="p-3">{new Date().toLocaleTimeString()}</td> {/* Show current time */}
+                    <td className="p-3">{time}</td> {/* Show current time */}
                     <td className="p-3">
                       <button
-                        className="btn btn-danger"
-                        onClick={() => onDeleteGroup(groupId)} // Call the delete function with groupId
+                        // Call the delete function with groupId
                       >
-                        <FaTrashCan />
+                         <img
+                          className="w-6 h-6 cursor-pointer"
+                          src={Bin}
+                          alt="Delete"
+                          onClick={() => onDeleteGroup(groupId)}
+                        />
                       </button>
                     </td>
                   </tr>

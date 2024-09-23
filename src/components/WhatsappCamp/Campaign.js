@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FaTrashCan } from "react-icons/fa6";
 import { toast } from "react-toastify"; // Assuming you're using react-toastify for notifications
 import CreateTemplate from "./CreateTemplate"; // Import the CreateTemplate component
-
+import Bin from "../../assets/TrashBinMinimalistic.png";
 const Campaign = ({ templateData = [], fetchTemplateData }) => {
   console.log(templateData);
   
@@ -106,9 +106,14 @@ const Campaign = ({ templateData = [], fetchTemplateData }) => {
                     <td className="p-3">
                       <button
                         className="btn btn-danger"
-                        onClick={() => onDeleteGroup(templateId)} // Call the delete function with templateId
+                         // Call the delete function with templateId
                       >
-                        <FaTrashCan />
+                        <img
+                          className="w-6 h-6 cursor-pointer"
+                          src={Bin}
+                          alt="Delete"
+                          onClick={() => onDeleteGroup(templateId)}
+                        />
                       </button>
                     </td>
                   </tr>

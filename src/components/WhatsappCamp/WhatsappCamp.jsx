@@ -84,20 +84,21 @@ const WhatsappCamp = () => {
 
     fetchSchedulingData();
   }, []);
-  useEffect(() => {
-    const fetchTemplateData = async () => {
-      try {
-        const response = await fetch(`https://whatsapp.copartner.in/api/templates`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch template data");
-        }
-        const data = await response.json();
-        setTemplateData(data); // Assuming data is an array of groups
-      } catch (error) {
-        console.error("Fetching error:", error);
-        toast.error(`Failed to fetch template data: ${error.message}`);
+  const fetchTemplateData = async () => {
+    try {
+      const response = await fetch(`https://whatsapp.copartner.in/api/templates`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch template data");
       }
-    };
+      const data = await response.json();
+      setTemplateData(data); // Assuming data is an array of groups
+    } catch (error) {
+      console.error("Fetching error:", error);
+      toast.error(`Failed to fetch template data: ${error.message}`);
+    }
+  };
+  useEffect(() => {
+    
 
     fetchTemplateData();
   }, []);
@@ -246,7 +247,7 @@ const WhatsappCamp = () => {
       case "Scheduling":
         return <div><Scheduling schedulingData={schedulingData} /></div>;
       case "Campaign":
-        return <div> <Campaign templateData={templateData} /></div>;
+        return <div> <Campaign templateData={templateData} fetchTemplateData={fetchTemplateData} /></div>;
       default:
         return null;
     }
