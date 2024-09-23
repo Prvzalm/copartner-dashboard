@@ -255,17 +255,17 @@ const Scheduling = () => {
       {/* Pagination controls */}
       <div className="pagination-controls mt-4 flex justify-center items-center">
         <button
-          className="btn btn-primary mx-2"
+          className="btn btn-primary mx-2 border border-black rounded-lg p-1"
           onClick={handlePreviousPage}
           disabled={currentPage === 1}
         >
-          Previous
+          Prev
         </button>
         <span className="mx-2">
           Page {currentPage} of {totalPages}
         </span>
         <button
-          className="btn btn-primary mx-2"
+          className="btn btn-primary mx-2 border border-black rounded-lg p-1"
           onClick={handleNextPage}
           disabled={currentPage === totalPages}
         >

@@ -64,8 +64,11 @@ const Group = ({ groupData = [], fetchGroupData }) => {
 
   return (
     <div className="py-4 px-8">
+      <div>
+      <h2 className="pl-3 text-xl font-semibold">Group Data</h2>
+      </div>
       <div className="table-container overflow-x-auto">
-        <h2 className="pl-3 text-xl font-semibold">Group Data</h2>
+        
 
         <table className="table-list min-w-max mt-4">
           <thead>
@@ -117,17 +120,17 @@ const Group = ({ groupData = [], fetchGroupData }) => {
       {/* Pagination controls */}
       <div className="pagination-controls mt-4 flex justify-center items-center">
         <button
-          className="btn btn-primary mx-2"
+          className="btn btn-primary mx-2 border border-black rounded-lg p-1"
           onClick={handlePreviousPage}
           disabled={currentPage === 1}
         >
-          Previous
+          Prev
         </button>
         <span className="mx-2">
           Page {currentPage} of {totalPages}
         </span>
         <button
-          className="btn btn-primary mx-2"
+          className="btn btn-primary mx-2 border border-black rounded-lg p-1"
           onClick={handleNextPage}
           disabled={currentPage === totalPages}
         >
