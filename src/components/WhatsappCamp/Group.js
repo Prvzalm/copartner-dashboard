@@ -44,7 +44,7 @@ const Group = ({ groupData = [], fetchGroupData }) => {
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`https://whatsapp.copartner.in/api/groups/${groupId}`, {
+      const response = await fetch(`http://localhost:5001/api/groups/${groupId}`, {
         method: "DELETE",
       });
 

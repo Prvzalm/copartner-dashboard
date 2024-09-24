@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+// src/components/WhatsappCamp.jsx
+import React, { useState, useEffect, useMemo } from "react";
 import { FaAngleLeft } from "react-icons/fa6";
-import PageHeader from "../Header/Header";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import UserListing from "./UserListing";
@@ -11,155 +11,292 @@ import Campaign from "./Campaign";
 
 const WhatsappCamp = () => {
   const navigate = useNavigate();
-  const [apDetails, setApDetails] = useState([]);
-  const [groupData, setGroupData] = useState([]);
-  const [schedulingData, setSchedulingData] = useState([]);
-  const [templateData, setTemplateData] = useState([]);
-  const [userDetails, setUserDetails] = useState([]);
-  const [currentView, setCurrentView] = useState("UserListing");
-  const [filterVisible, setFilterVisible] = useState(false);
-  const [filters, setFilters] = useState(null);
 
-  useEffect(() => {
-    const fetchAPDetails = async () => {
+  // State variables
+  const [apDetails, setApDetails] = useState([]); // Users from User API
+  const [groupData, setGroupData] = useState([]); // Groups data
+  const [schedulingData, setSchedulingData] = useState([]); // Scheduling data
+  const [templateData, setTemplateData] = useState([]); // Template data
+  const [userDetails, setUserDetails] = useState([]); // Subscriptions per user
+  const [currentView, setCurrentView] = useState("UserListing"); // Current active view
+  const [filterVisible, setFilterVisible] = useState(false); // Filter modal visibility
+  const [filters, setFilters] = useState(null); // Active filters
+  const [isLoading, setIsLoading] = useState(true); // Loading state
+  const [searchQuery, setSearchQuery] = useState(""); // Search query state
+
+  /**
+   * Fetches all users from the User API with pagination.
+   */
+  const fetchAllUsers = async () => {
+    let allUsers = [];
+    let page = 1;
+    const pageSize = 1000; // Adjust based on API limits
+    let hasMore = true;
+
+    while (hasMore) {
       try {
+        console.log(`Fetching users from page ${page}`);
         const response = await fetch(
-          `https://copartners.in:5131/api/User?page=1&pageSize=100000`
+          `https://copartners.in:5131/api/User?page=${page}&pageSize=${pageSize}`
         );
+
+        console.log(`User API Response Status for page ${page}:`, response.status);
+
         if (!response.ok) {
-          throw new Error("Failed to fetch user data");
-        }
-        const data = await response.json();
-        if (data.isSuccess) {
-          const sortedData = data.data.sort(
-            (a, b) => new Date(b.createdOn) - new Date(a.createdOn)
+          throw new Error(
+            `Failed to fetch user data on page ${page}: ${response.statusText}`
           );
-          setApDetails(sortedData);
-        } else {
-          setApDetails([]);
         }
-      } catch (error) {
-        console.error("Fetching error:", error);
-        toast.error(`Failed to fetch data: ${error.message}`);
-      }
-    };
 
-    fetchAPDetails();
-  }, []);
-  const fetchGroupData = async () => {
-    try {
-      const response = await fetch(`https://whatsapp.copartner.in/api/groups`);
-      
-      if (!response.ok) {
-        throw new Error("Failed to fetch group data");
-      }
-      const data = await response.json();
-      console.log(data);
-      setGroupData(data); // Assuming data is an array of groups
-    } catch (error) {
-      console.error("Fetching error:", error);
-      toast.error(`Failed to fetch group data: ${error.message}`);
-    }
-  };
-  useEffect(() => {
-   
-
-    fetchGroupData();
-  }, []);
-
-  useEffect(() => {
-    const fetchSchedulingData = async () => {
-      try {
-        const response = await fetch(`https://whatsapp.copartner.in/api/schedule`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch Scheduling data");
-        }
         const data = await response.json();
-        setSchedulingData(data); // Assuming data is an array of groups
+        console.log(`Fetched ${data.data.length} users from page ${page}`);
+
+        if (data.isSuccess && Array.isArray(data.data) && data.data.length > 0) {
+          allUsers = [...allUsers, ...data.data];
+          // Check if more pages exist
+          if (data.data.length < pageSize) {
+            hasMore = false;
+          } else {
+            page += 1;
+          }
+        } else {
+          console.log(`No more users to fetch on page ${page}`);
+          hasMore = false;
+        }
       } catch (error) {
-        console.error("Fetching error:", error);
-        toast.error(`Failed to fetch Schedule data: ${error.message}`);
+        console.error("Error fetching users:", error);
+        toast.error(`Failed to fetch user data: ${error.message}`);
+        hasMore = false;
       }
-    };
-
-    fetchSchedulingData();
-  }, []);
-  const fetchTemplateData = async () => {
-    try {
-      const response = await fetch(`https://whatsapp.copartner.in/api/templates`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch template data");
-      }
-      const data = await response.json();
-      setTemplateData(data); // Assuming data is an array of groups
-    } catch (error) {
-      console.error("Fetching error:", error);
-      toast.error(`Failed to fetch template data: ${error.message}`);
     }
+
+    setApDetails(allUsers);
+    console.log(`Total Users Fetched: ${allUsers.length}`);
   };
-  useEffect(() => {
-    
 
-    fetchTemplateData();
-  }, []);
+  /**
+   * Fetches subscription data for all users in batches to prevent overwhelming the API.
+   */
+  const fetchAllSubscriptions = async () => {
+    if (apDetails.length === 0) {
+      console.log("No users to fetch subscriptions for.");
+      return;
+    }
 
-  useEffect(() => {
-    const fetchAdditionalUserDetails = async () => {
-      const userIds = apDetails.map((user) => user.id);
+    console.log(`Fetching subscriptions for ${apDetails.length} users...`);
 
-      const operations = userIds.map(async (userId) => {
+    const userIds = apDetails.map((user) => user.id);
+    const batchSize = 50; // Adjust based on API rate limits
+    const batches = [];
+
+    // Create batches of userIds
+    for (let i = 0; i < userIds.length; i += batchSize) {
+      batches.push(userIds.slice(i, i + batchSize));
+    }
+
+    let allSubscriptions = [];
+
+    // Fetch subscriptions for each batch sequentially
+    for (const [batchIndex, batch] of batches.entries()) {
+      console.log(`Processing batch ${batchIndex + 1} with ${batch.length} users`);
+
+      const promises = batch.map(async (userId) => {
         try {
+          console.log(`Fetching subscription data for userId: ${userId}`);
           const response = await fetch(
             `https://copartners.in:5009/api/Subscriber/GetByUserId/${userId}`
           );
+
+          console.log(`Subscription API Status for user ${userId}:`, response.status);
+
           if (!response.ok) {
-            throw new Error("Failed to fetch subscriber data");
+            throw new Error(
+              `Failed to fetch subscriber data for user ${userId}: ${response.statusText}`
+            );
           }
+
           const subscriberData = await response.json();
-          return {
-            userId,
-            subscriptions: subscriberData.data.map((sub) => ({
+          console.log(`Subscription API Response for user ${userId}:`, subscriberData);
+
+          if (subscriberData.isSuccess && Array.isArray(subscriberData.data)) {
+            const mappedSubscriptions = subscriberData.data.map((sub) => ({
               amount: sub?.totalAmount || 0,
-              RAname: sub?.subscription.experts.name || "N/A",
-              planType: sub?.subscription.planType || "N/A",
-              serviceType: sub?.subscription.serviceType || "N/A",
-            })),
-          };
+              RAname: sub?.subscription?.experts?.name
+                ? sub.subscription.experts.name.trim()
+                : "N/A",
+              planType: sub?.subscription?.planType
+                ? sub.subscription.planType.trim()
+                : "N/A",
+              serviceType: sub?.subscription?.serviceType
+                ? sub.subscription.serviceType.trim()
+                : "N/A",
+            }));
+
+            console.log(
+              `User ${userId} has ${mappedSubscriptions.length} subscriptions:`,
+              mappedSubscriptions
+            );
+            return {
+              userId,
+              subscriptions: mappedSubscriptions,
+            };
+          } else {
+            console.log(`User ${userId} has no subscriptions or API returned failure`);
+            return { userId, subscriptions: [] };
+          }
         } catch (error) {
           console.error(`Error fetching subscriber data for user ${userId}:`, error);
-          return null;
+          return { userId, subscriptions: [] };
         }
       });
 
-      const additionalData = await Promise.all(operations);
-      setUserDetails(additionalData.filter(Boolean));
-    };
-
-    if (apDetails.length > 0) {
-      fetchAdditionalUserDetails();
+      // Await all promises in the current batch
+      const results = await Promise.all(promises);
+      allSubscriptions = [...allSubscriptions, ...results];
+      console.log(`Completed batch ${batchIndex + 1}`);
     }
-  }, [apDetails]);
 
-  const combinedUserData = apDetails.map((user) => {
-    const additionalData =
-      userDetails.find((detail) => detail.userId === user.id) || {
-        subscriptions: [],
-      };
-    return { ...user, subscriptions: additionalData.subscriptions };
-  });
-
-  const applyFilter = (filters) => {
-    setFilters(filters);
-    setFilterVisible(false);
+    setUserDetails(allSubscriptions);
+    console.log("Fetched all subscriptions:", allSubscriptions.length);
   };
 
+  /**
+   * Fetches group data.
+   */
+  const fetchGroupData = async () => {
+    try {
+      console.log("Fetching group data...");
+      const response = await fetch(`https://whatsapp.copartner.in/api/groups`);
+
+      console.log(`Group API Response Status:`, response.status);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch group data");
+      }
+
+      const data = await response.json();
+      console.log("Fetched Group Data:", data);
+      setGroupData(data); // Assuming data is an array of groups
+    } catch (error) {
+      console.error("Error fetching group data:", error);
+      toast.error(`Failed to fetch group data: ${error.message}`);
+    }
+  };
+
+  /**
+   * Fetches scheduling data.
+   */
+  const fetchSchedulingData = async () => {
+    try {
+      console.log("Fetching scheduling data...");
+      const response = await fetch(`https://whatsapp.copartner.in/api/schedule`);
+      console.log(`Scheduling API Response Status:`, response.status);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch scheduling data");
+      }
+
+      const data = await response.json();
+      console.log("Fetched Scheduling Data:", data);
+      setSchedulingData(data); // Assuming data is an array of schedules
+    } catch (error) {
+      console.error("Error fetching scheduling data:", error);
+      toast.error(`Failed to fetch scheduling data: ${error.message}`);
+    }
+  };
+
+  /**
+   * Fetches template data.
+   */
+  const fetchTemplateData = async () => {
+    try {
+      console.log("Fetching template data...");
+      const response = await fetch(`https://whatsapp.copartner.in/api/templates`);
+      console.log(`Template API Response Status:`, response.status);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch template data");
+      }
+
+      const data = await response.json();
+      console.log("Fetched Template Data:", data);
+      setTemplateData(data); // Assuming data is an array of templates
+    } catch (error) {
+      console.error("Error fetching template data:", error);
+      toast.error(`Failed to fetch template data: ${error.message}`);
+    }
+  };
+
+  /**
+   * useEffect hook to fetch all necessary data on component mount.
+   */
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      await fetchAllUsers();
+      await fetchAllSubscriptions();
+      await fetchGroupData();
+      await fetchSchedulingData();
+      await fetchTemplateData();
+      setIsLoading(false);
+    };
+
+    fetchData();
+  }, []);
+
+  /**
+   * Combines user data with their corresponding subscriptions.
+   */
+  const combinedUserData = useMemo(() => {
+    const combined = apDetails.map((user) => {
+      const additionalData =
+        userDetails.find((detail) => detail.userId === user.id) || {
+          subscriptions: [],
+        };
+      return {
+        ...user,
+        subscriptions: additionalData.subscriptions,
+      };
+    });
+    console.log("Combined User Data Sample:", combined.slice(0, 5)); // Log first 5 users for verification
+
+    // Specific user check (e.g., with RAname 'BIBHAV NAYAK')
+    const specificUser = combined.find((user) =>
+      user.subscriptions.some((sub) => sub.RAname.toLowerCase() === "bibhav nayak")
+    );
+    console.log("Specific User with RAname 'BIBHAV NAYAK':", specificUser);
+
+    return combined;
+  }, [apDetails, userDetails]);
+
+  /**
+   * Applies the selected filters.
+   */
+  const applyFilter = (filterCriteria) => {
+    setFilters(filterCriteria);
+    setFilterVisible(false);
+    console.log("Filters applied:", filterCriteria);
+  };
+
+  /**
+   * Clears all active filters.
+   */
   const clearFilter = () => {
     setFilters(null);
     setFilterVisible(false);
+    console.log("Filters cleared.");
   };
 
-  const filteredUserData = combinedUserData.filter((user) => {
-    if (!filters) return true;
+  /**
+   * Normalizes text for consistent comparison.
+   */
+  const normalizeText = (text) => (text ? text.trim().toLowerCase() : "n/a");
+
+  /**
+   * Filtering logic that processes all subscriptions for each user.
+   */
+  const filteredUserData = useMemo(() => {
+    if (!filters) return combinedUserData;
 
     const {
       selectedKYC,
@@ -169,85 +306,174 @@ const WhatsappCamp = () => {
       selectedSubscriptionType,
       selectedRAName,
       amountRange,
-      selectedAmount, // New amount filter
+      selectedAmount,
+      selectedGroup,
+      startDate,
+      endDate,
     } = filters;
 
-    let matches = true;
+    return combinedUserData.filter((user) => {
+      // KYC Filter
+      const userKYCStatus = user.isKYC ? "yes" : "no";
+      if (selectedKYC.length > 0 && !selectedKYC.includes(userKYCStatus)) {
+        return false;
+      }
 
-    if (selectedKYC.length > 0 && !selectedKYC.includes(user.isKYC ? "Yes" : "No")) {
-      matches = false;
-    }
-    if (
-      selectedReferralMode.length > 0 &&
-      !selectedReferralMode.includes(user.referralMode || "N/A")
-    ) {
-      matches = false;
-    }
-    if (
-      selectedLandingUrl.length > 0 &&
-      !user.landingPageUrl.includes(selectedLandingUrl[0])
-    ) {
-      matches = false;
-    }
-    if (
-      selectedSubscription.length > 0 &&
-      !user.subscriptions.some((sub) =>
-        sub.planType.toLowerCase().includes(selectedSubscription[0].toLowerCase())
-      )
-    ) {
-      matches = false;
-    }
-    if (
-      selectedSubscriptionType.length > 0 &&
-      !user.subscriptions.some((sub) =>
-        sub.serviceType.toLowerCase().includes(selectedSubscriptionType[0].toLowerCase())
-      )
-    ) {
-      matches = false;
-    }
-    if (
-      selectedRAName.length > 0 &&
-      !user.subscriptions.some((sub) =>
-        sub.RAname.toLowerCase().includes(selectedRAName[0].toLowerCase())
-      )
-    ) {
-      matches = false;
-    }
-    if (selectedAmount.length > 0) {
-      const paymentsCount = user.subscriptions.length;
-      if (selectedAmount.includes("one") && paymentsCount > 1) {
-        matches = false;
-      }
-      if (selectedAmount.includes("more") && paymentsCount <= 1) {
-        matches = false;
-      }
-    }
-    if (amountRange.start !== "" && amountRange.end !== "") {
-      const totalAmount = user.subscriptions.reduce(
-        (sum, sub) => sum + sub.amount,
-        0
-      );
+      // Referral Mode Filter
       if (
-        totalAmount < parseFloat(amountRange.start) ||
-        totalAmount > parseFloat(amountRange.end)
+        selectedReferralMode.length > 0 &&
+        !selectedReferralMode.includes(normalizeText(user.referralMode))
       ) {
-        matches = false;
+        return false;
       }
+
+      // Landing URL Filter
+      if (
+        selectedLandingUrl.length > 0 &&
+        !selectedLandingUrl.includes(normalizeText(user.landingPageUrl))
+      ) {
+        return false;
+      }
+
+      // Subscription Filter
+      if (selectedSubscription.length > 0) {
+        const userSubscriptions = user.subscriptions.map((sub) =>
+          normalizeText(sub.planType)
+        );
+        if (!selectedSubscription.some((sub) => userSubscriptions.includes(sub))) {
+          return false;
+        }
+      }
+
+      // Subscription Type Filter
+      if (selectedSubscriptionType.length > 0) {
+        const userSubscriptionTypes = user.subscriptions.map((sub) =>
+          normalizeText(sub.serviceType)
+        );
+        if (
+          !selectedSubscriptionType.some((type) =>
+            userSubscriptionTypes.includes(type)
+          )
+        ) {
+          return false;
+        }
+      }
+
+      // RA Name Filter
+      if (selectedRAName.length > 0) {
+        const userRANames = user.subscriptions.map((sub) =>
+          normalizeText(sub.RAname)
+        );
+        if (!selectedRAName.some((name) => userRANames.includes(name))) {
+          return false;
+        }
+      }
+
+      // Amount Filter (Number of Payments)
+      if (selectedAmount.length > 0) {
+        const paymentsCount = user.subscriptions.length;
+        const hasOnePayment =
+          selectedAmount.includes("one") && paymentsCount === 1;
+        const hasMoreThanOnePayment =
+          selectedAmount.includes("more than one") && paymentsCount > 1;
+
+        if (!hasOnePayment && !hasMoreThanOnePayment) {
+          return false;
+        }
+      }
+
+      // Amount Range Filter
+      if (amountRange.start !== "" || amountRange.end !== "") {
+        const totalAmount = user.subscriptions.reduce(
+          (sum, sub) => sum + (sub.amount || 0),
+          0
+        );
+        if (
+          amountRange.start !== "" &&
+          totalAmount < parseFloat(amountRange.start)
+        ) {
+          return false;
+        }
+        if (
+          amountRange.end !== "" &&
+          totalAmount > parseFloat(amountRange.end)
+        ) {
+          return false;
+        }
+      }
+
+      // Group Filter
+      if (selectedGroup.length > 0) {
+        if (
+          !selectedGroup.includes(normalizeText(user.groupName))
+        ) {
+          return false;
+        }
+      }
+
+      // Date Range Filter
+      if (startDate || endDate) {
+        const userDate = new Date(user.createdOn);
+        if (startDate && userDate < new Date(startDate)) {
+          return false;
+        }
+        if (endDate && userDate > new Date(endDate)) {
+          return false;
+        }
+      }
+
+      // If all filters pass
+      return true;
+    });
+  }, [filters, combinedUserData]);
+
+  /**
+   * Logs active filters and the count of filtered users for debugging.
+   */
+  useEffect(() => {
+    if (filters) {
+      console.log("Active Filters:", filters);
+      console.log("Filtered User Data Count:", filteredUserData.length);
+      // Uncomment the line below to see all filtered users
+      // console.log("Filtered Users:", filteredUserData);
     }
+  }, [filters, filteredUserData]);
 
-    return matches;
-  });
+  /**
+   * Handles search functionality.
+   * Filters users based on the search query matching name or mobile number.
+   */
+  const searchedUserData = useMemo(() => {
+    if (!searchQuery) return filteredUserData;
 
+    const lowerCaseQuery = searchQuery.toLowerCase();
+
+    return filteredUserData.filter(
+      (user) =>
+        (user.name && user.name.toLowerCase().includes(lowerCaseQuery)) ||
+        (user.mobileNumber &&
+          user.mobileNumber.toLowerCase().includes(lowerCaseQuery))
+    );
+  }, [searchQuery, filteredUserData]);
+
+  /**
+   * Renders the content based on the current view.
+   */
   const renderContent = () => {
     switch (currentView) {
       case "UserListing":
-        return <UserListing apDetails={filteredUserData} />;
+        return <UserListing apDetails={searchedUserData} />;
       case "Group":
         return <Group groupData={groupData} fetchGroupData={fetchGroupData} />;
       case "Scheduling":
-        return <div><Scheduling schedulingData={schedulingData} /></div>;
+        return <Scheduling schedulingData={schedulingData} />;
       case "Campaign":
-        return <div> <Campaign templateData={templateData} fetchTemplateData={fetchTemplateData} /></div>;
+        return (
+          <Campaign
+            templateData={templateData}
+            fetchTemplateData={fetchTemplateData}
+          />
+        );
       default:
         return null;
     }
@@ -255,13 +481,21 @@ const WhatsappCamp = () => {
 
   return (
     <div className="dashboard-container p-0 sm:ml-60">
-      <PageHeader
-        title="Whatsapp Campaign."
-        searchQuery=""
-        setSearchQuery={() => {}}
-        hasNotification={false}
-        setHasNotification={() => {}}
-      />
+      {/* Custom Page Header */}
+      <div className="bg-white shadow p-4 flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Whatsapp Campaign</h1>
+        <div className="flex items-center space-x-4">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by name or mobile..."
+            className="p-2 border border-gray-300 rounded-md"
+          />
+        </div>
+      </div>
+
+      {/* Back Button */}
       <div className="back-button flex items-center text-2xl font-bold p-6">
         <button
           style={{ display: "flex", alignItems: "center" }}
@@ -272,12 +506,16 @@ const WhatsappCamp = () => {
         </button>
       </div>
 
+      {/* Main Content Container */}
       <div className="requestContainer mx-5 bg-[#fff]">
+        {/* View Selection Buttons */}
         <div className="flex justify-between items-center p-4">
           <div>
             <button
               className={`btn mx-2 border rounded-lg p-2 ${
-                currentView === "UserListing" ? "border-black font-bold" : "border-gray-300"
+                currentView === "UserListing"
+                  ? "border-black font-bold"
+                  : "border-gray-300"
               }`}
               onClick={() => setCurrentView("UserListing")}
             >
@@ -285,7 +523,9 @@ const WhatsappCamp = () => {
             </button>
             <button
               className={`btn mx-2 border rounded-lg p-2 ${
-                currentView === "Group" ? "border-black font-bold" : "border-gray-300"
+                currentView === "Group"
+                  ? "border-black font-bold"
+                  : "border-gray-300"
               }`}
               onClick={() => setCurrentView("Group")}
             >
@@ -293,7 +533,9 @@ const WhatsappCamp = () => {
             </button>
             <button
               className={`btn mx-2 border rounded-lg p-2 ${
-                currentView === "Scheduling" ? "border-black font-bold" : "border-gray-300"
+                currentView === "Scheduling"
+                  ? "border-black font-bold"
+                  : "border-gray-300"
               }`}
               onClick={() => setCurrentView("Scheduling")}
             >
@@ -301,7 +543,9 @@ const WhatsappCamp = () => {
             </button>
             <button
               className={`btn mx-2 border rounded-lg p-2 ${
-                currentView === "Campaign" ? "border-black font-bold" : "border-gray-300"
+                currentView === "Campaign"
+                  ? "border-black font-bold"
+                  : "border-gray-300"
               }`}
               onClick={() => setCurrentView("Campaign")}
             >
@@ -309,6 +553,7 @@ const WhatsappCamp = () => {
             </button>
           </div>
 
+          {/* Filter and Clear Filter Buttons (Only in UserListing View) */}
           {currentView === "UserListing" && (
             <div>
               <button
@@ -327,17 +572,24 @@ const WhatsappCamp = () => {
           )}
         </div>
 
-        {renderContent()}
+        {/* Loading Indicator */}
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <span className="text-xl">Loading Users...</span>
+          </div>
+        ) : (
+          // Render the selected view
+          renderContent()
+        )}
 
+        {/* Filter Modal */}
         {filterVisible && (
           <Filter
             closePopup={() => setFilterVisible(false)}
             applyFilter={applyFilter}
-            clearFilter={clearFilter}
             combinedUserData={combinedUserData}
             groupData={groupData}
-            initialFilters={filters || {}}  // Pass the stored filters as initialFilters
-
+            initialFilters={filters || {}}
           />
         )}
       </div>

@@ -26,10 +26,9 @@
     "react-scripts": "5.0.1",
     "react-select": "^5.8.0",
     "react-toastify": "^10.0.5",
+    "react-window": "^1.8.10",
     "web-vitals": "^2.1.4",
-    "xlsx": "^0.18.5",
-    "proxy": "https://whatsapp.copartner.in"
-
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "react-scripts start",
