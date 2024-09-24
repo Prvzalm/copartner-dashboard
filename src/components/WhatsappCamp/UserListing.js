@@ -173,7 +173,7 @@ const UserListing = ({ apDetails }) => {
             <div className="w-2/12 p-2">
               {user.subscriptions.length > 0
                 ? user.subscriptions
-                    .map((sub) => (sub.amount ? `$${sub.amount.toFixed(2)}` : "N/A"))
+                    .map((sub) => (sub.amount ? `₹${sub.amount.toFixed(2)}` : "N/A"))
                     .join(", ")
                 : "N/A"}
             </div>
@@ -223,7 +223,7 @@ const UserListing = ({ apDetails }) => {
             </div>
             {/* Amount */}
             <div className="w-2/12 p-2 pl-6">
-              {sub.amount ? `$${sub.amount.toFixed(2)}` : "N/A"}
+              {sub.amount ? `₹${sub.amount.toFixed(2)}` : "N/A"}
             </div>
             {/* Subscription Name */}
             <div className="w-2/12 p-2 pl-6">

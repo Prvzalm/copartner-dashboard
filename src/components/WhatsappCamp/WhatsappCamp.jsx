@@ -4,10 +4,10 @@ import { FaAngleLeft } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import UserListing from "./UserListing";
-import Group from "./Group";
-import Filter from "./Filter";
-import Scheduling from "./Scheduling";
-import Campaign from "./Campaign";
+import Group from "./Group"; // Ensure this component exists
+import Filter from "./Filter"; // Ensure this component exists
+import Scheduling from "./Scheduling"; // Ensure this component exists
+import Campaign from "./Campaign"; // Ensure this component exists
 
 const WhatsappCamp = () => {
   const navigate = useNavigate();
@@ -26,6 +26,7 @@ const WhatsappCamp = () => {
 
   /**
    * Fetches all users from the User API with pagination.
+   * Returns the fetched users.
    */
   const fetchAllUsers = async () => {
     let allUsers = [];
@@ -38,6 +39,13 @@ const WhatsappCamp = () => {
         console.log(`Fetching users from page ${page}`);
         const response = await fetch(
           `https://copartners.in:5131/api/User?page=${page}&pageSize=${pageSize}`
+          // Include headers if authentication is required
+          // {
+          //   headers: {
+          //     Authorization: `Bearer YOUR_ACCESS_TOKEN`,
+          //     // ...other headers
+          //   },
+          // }
         );
 
         console.log(`User API Response Status for page ${page}:`, response.status);
@@ -72,20 +80,22 @@ const WhatsappCamp = () => {
 
     setApDetails(allUsers);
     console.log(`Total Users Fetched: ${allUsers.length}`);
+    return allUsers; // Return fetched users
   };
 
   /**
-   * Fetches subscription data for all users in batches to prevent overwhelming the API.
+   * Fetches subscription data for the provided users.
+   * @param {Array} users - List of user objects to fetch subscriptions for.
    */
-  const fetchAllSubscriptions = async () => {
-    if (apDetails.length === 0) {
+  const fetchAllSubscriptions = async (users) => {
+    if (users.length === 0) {
       console.log("No users to fetch subscriptions for.");
       return;
     }
 
-    console.log(`Fetching subscriptions for ${apDetails.length} users...`);
+    console.log(`Fetching subscriptions for ${users.length} users...`);
 
-    const userIds = apDetails.map((user) => user.id);
+    const userIds = users.map((user) => user.id);
     const batchSize = 50; // Adjust based on API rate limits
     const batches = [];
 
@@ -105,6 +115,13 @@ const WhatsappCamp = () => {
           console.log(`Fetching subscription data for userId: ${userId}`);
           const response = await fetch(
             `https://copartners.in:5009/api/Subscriber/GetByUserId/${userId}`
+            // Include headers if authentication is required
+            // {
+            //   headers: {
+            //     Authorization: `Bearer YOUR_ACCESS_TOKEN`,
+            //     // ...other headers
+            //   },
+            // }
           );
 
           console.log(`Subscription API Status for user ${userId}:`, response.status);
@@ -158,6 +175,14 @@ const WhatsappCamp = () => {
 
     setUserDetails(allSubscriptions);
     console.log("Fetched all subscriptions:", allSubscriptions.length);
+
+    // Check for any missing subscriptions
+    const missingSubscriptions = users.filter(
+      (user) => !allSubscriptions.some((detail) => detail.userId === user.id)
+    );
+    if (missingSubscriptions.length > 0) {
+      console.warn(`Missing subscriptions for ${missingSubscriptions.length} users.`);
+    }
   };
 
   /**
@@ -233,12 +258,17 @@ const WhatsappCamp = () => {
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      await fetchAllUsers();
-      await fetchAllSubscriptions();
-      await fetchGroupData();
-      await fetchSchedulingData();
-      await fetchTemplateData();
-      setIsLoading(false);
+      try {
+        const users = await fetchAllUsers();
+        await fetchAllSubscriptions(users);
+        await fetchGroupData();
+        await fetchSchedulingData();
+        await fetchTemplateData();
+      } catch (error) {
+        console.error("Error in fetchData:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchData();
@@ -404,9 +434,7 @@ const WhatsappCamp = () => {
 
       // Group Filter
       if (selectedGroup.length > 0) {
-        if (
-          !selectedGroup.includes(normalizeText(user.groupName))
-        ) {
+        if (!selectedGroup.includes(normalizeText(user.groupName))) {
           return false;
         }
       }
@@ -492,6 +520,14 @@ const WhatsappCamp = () => {
             placeholder="Search by name or mobile..."
             className="p-2 border border-gray-300 rounded-md"
           />
+          {/* Notification Badge (Optional) */}
+          {/* 
+          {hasNotification && (
+            <span className="bg-red-500 text-white px-2 py-1 rounded-full text-sm">
+              New
+            </span>
+          )} 
+          */}
         </div>
       </div>
 
