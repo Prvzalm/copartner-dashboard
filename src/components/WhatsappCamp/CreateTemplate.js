@@ -1,5 +1,12 @@
-import React, { useState } from 'react';
+// src/components/CreateTemplate.jsx
+
+import React, { useState, useEffect } from 'react';
 import axios from 'axios'; // For making API requests
+import DatePicker from 'react-datepicker'; // If needed for date inputs
+import 'react-datepicker/dist/react-datepicker.css';
+import { FaTimes, FaPlus, FaMinus } from 'react-icons/fa'; // Icons for UI
+import { toast } from 'react-toastify'; // For notifications
+import Select from 'react-select'; // For dropdowns
 
 const CreateTemplate = ({ closePopup }) => {
   const [templateData, setTemplateData] = useState({
@@ -14,8 +21,14 @@ const CreateTemplate = ({ closePopup }) => {
     source: 'new-landing-page form', // Default value
   });
 
-  const [newParam, setNewParam] = useState(''); // For new template parameter
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Predefined parameter options
+  const paramOptions = [
+    { value: '$UserName', label: 'UserName' },
+    { value: '$RaName', label: 'RaName' },
+    { value: 'Custom', label: 'Custom' },
+  ];
 
   // Handle input change for the form fields
   const handleInputChange = (e) => {
@@ -26,15 +39,15 @@ const CreateTemplate = ({ closePopup }) => {
     }));
   };
 
-  // Add new template param
+  // Add a new template parameter
   const handleAddParam = () => {
-    if (newParam.trim()) {
-      setTemplateData((prev) => ({
-        ...prev,
-        templateParams: [...prev.templateParams, newParam],
-      }));
-      setNewParam(''); // Clear input after adding
-    }
+    setTemplateData((prev) => ({
+      ...prev,
+      templateParams: [
+        ...prev.templateParams,
+        { paramType: '', paramValue: '' }, // Initialize with empty values
+      ],
+    }));
   };
 
   // Remove a template parameter
@@ -45,33 +58,89 @@ const CreateTemplate = ({ closePopup }) => {
     }));
   };
 
+  // Handle change in a specific template parameter
+  const handleParamChange = (index, field, value) => {
+    const updatedParams = [...templateData.templateParams];
+    updatedParams[index][field] = value;
+
+    // If paramType is not Custom, clear paramValue
+    if (field === 'paramType' && value !== 'Custom') {
+      updatedParams[index]['paramValue'] = '';
+    }
+
+    setTemplateData((prev) => ({
+      ...prev,
+      templateParams: updatedParams,
+    }));
+  };
+
   // Validate template data before submission
   const validateTemplateData = () => {
-    const { name, apiKey, campaignName, userName } = templateData;
+    const { name, apiKey, campaignName, userName, templateParams } = templateData;
     if (!name || !apiKey || !campaignName || !userName) {
-      alert('Please fill in all required fields.');
+      toast.error('Please fill in all required fields.');
       return false;
     }
+
+    // Validate each template parameter
+    for (let i = 0; i < templateParams.length; i++) {
+      const { paramType, paramValue } = templateParams[i];
+      if (!paramType) {
+        toast.error(`Please select a parameter type for Param${i + 1}.`);
+        return false;
+      }
+      if (paramType === 'Custom' && !paramValue.trim()) {
+        toast.error(`Please enter a value for Param${i + 1}.`);
+        return false;
+      }
+    }
+
     return true;
   };
 
   // Submit the template data to the backend
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
     if (!validateTemplateData()) return; // Validate form inputs
 
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post('https://whatsapp.copartner.in/api/templates', templateData);
-      if (response.status === 200) {
-        alert('Template saved successfully');
+      // Assign Param1, Param2, etc., based on the order
+      const formattedParams = templateData.templateParams.map((param, index) => {
+        let value = '';
+        if (param.paramType === 'Custom') {
+          value = param.paramValue;
+        } else {
+          value = param.paramType;
+        }
+        return `Param${index + 1}: ${value}`;
+      });
+
+      const payload = {
+        name: templateData.name,
+        apiUrl: templateData.apiUrl,
+        apiKey: templateData.apiKey,
+        campaignName: templateData.campaignName,
+        userName: templateData.userName,
+        templateParams: formattedParams,
+        mediaUrl: templateData.mediaUrl,
+        mediaFilename: templateData.mediaFilename,
+        source: templateData.source,
+      };
+
+      const response = await axios.post('https://whatsapp.copartner.in/api/templates', payload);
+
+      if (response.status === 200 || response.status === 201) {
+        toast.success('Template saved successfully');
         closePopup(); // Close the popup after success
       } else {
-        alert('Failed to save template');
+        toast.error('Failed to save template');
       }
     } catch (error) {
       console.error('Error saving template:', error);
-      alert('An error occurred while saving the template');
+      toast.error('An error occurred while saving the template');
     } finally {
       setIsSubmitting(false); // Reset the loading state
     }
@@ -79,153 +148,187 @@ const CreateTemplate = ({ closePopup }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white p-8 rounded shadow-lg w-full max-w-md relative">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl relative overflow-y-auto max-h-screen">
         {/* Close (Cross) Button */}
         <button
           onClick={closePopup}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none"
           aria-label="Close"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <FaTimes size={24} />
         </button>
 
         <h2 className="text-2xl font-bold mb-6">Create Template</h2>
 
         {/* Template Form Fields */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Name</label>
-          <input
-            type="text"
-            name="name"
-            value={templateData.name}
-            onChange={handleInputChange}
-            className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={isSubmitting}
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">API Key</label>
-          <input
-            type="text"
-            name="apiKey"
-            value={templateData.apiKey}
-            onChange={handleInputChange}
-            className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={isSubmitting}
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Campaign Name</label>
-          <input
-            type="text"
-            name="campaignName"
-            value={templateData.campaignName}
-            onChange={handleInputChange}
-            className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={isSubmitting}
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">User Name</label>
-          <input
-            type="text"
-            name="userName"
-            value={templateData.userName}
-            onChange={handleInputChange}
-            className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={isSubmitting}
-          />
-        </div>
-
-        {/* Template Params Section */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Template Params</label>
-          <div className="flex space-x-2 mb-2">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Name<span className="text-red-500">*</span></label>
             <input
               type="text"
-              value={newParam}
-              onChange={(e) => setNewParam(e.target.value)}
-              placeholder="Add template parameter"
-              className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isSubmitting}
+              name="name"
+              value={templateData.name}
+              onChange={handleInputChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter Template Name"
+              required
             />
+          </div>
+
+          {/* API Key */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">API Key<span className="text-red-500">*</span></label>
+            <input
+              type="text"
+              name="apiKey"
+              value={templateData.apiKey}
+              onChange={handleInputChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter API Key"
+              required
+            />
+          </div>
+
+          {/* Campaign Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Campaign Name<span className="text-red-500">*</span></label>
+            <input
+              type="text"
+              name="campaignName"
+              value={templateData.campaignName}
+              onChange={handleInputChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter Campaign Name"
+              required
+            />
+          </div>
+
+          {/* User Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">User Name<span className="text-red-500">*</span></label>
+            <input
+              type="text"
+              name="userName"
+              value={templateData.userName}
+              onChange={handleInputChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter User Name"
+              required
+            />
+          </div>
+
+          {/* Template Params Section */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Template Params</label>
+            <div className="space-y-4">
+              {templateData.templateParams.map((param, index) => (
+                <div key={index} className="flex items-center space-x-4">
+                  {/* Dropdown to select param type */}
+                  <Select
+                    options={paramOptions}
+                    value={paramOptions.find(option => option.value === param.paramType) || null}
+                    onChange={(selectedOption) => handleParamChange(index, 'paramType', selectedOption.value)}
+                    placeholder="Select Param Type"
+                    className="w-1/3"
+                  />
+
+                  {/* Input for custom param if 'Custom' is selected */}
+                  {param.paramType === 'Custom' && (
+                    <input
+                      type="text"
+                      value={param.paramValue}
+                      onChange={(e) => handleParamChange(index, 'paramValue', e.target.value)}
+                      placeholder="Enter Custom Param"
+                      className="w-2/3 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  )}
+
+                  {/* Remove Param Button */}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveParam(index)}
+                    className="text-red-500 hover:text-red-700 focus:outline-none"
+                    aria-label={`Remove Param ${index + 1}`}
+                  >
+                    <FaMinus />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Add Param Button */}
             <button
               type="button"
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none"
               onClick={handleAddParam}
-              disabled={isSubmitting}
+              className="mt-4 flex items-center text-blue-500 hover:text-blue-700 focus:outline-none"
             >
-              Add
+              <FaPlus className="mr-2" />
+              Add Parameter
             </button>
           </div>
 
-          {/* List of added params */}
-          <ul className="list-disc pl-5">
-            {templateData.templateParams.map((param, index) => (
-              <li key={index} className="mb-2">
-                {param}
-                <button
-                  type="button"
-                  className="ml-2 text-red-500 hover:text-red-700 focus:outline-none"
-                  onClick={() => handleRemoveParam(index)}
-                >
-                  Remove
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
+          {/* Media URL */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Media URL</label>
+            <input
+              type="text"
+              name="mediaUrl"
+              value={templateData.mediaUrl}
+              onChange={handleInputChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter Media URL"
+            />
+          </div>
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Media URL</label>
-          <input
-            type="text"
-            name="mediaUrl"
-            value={templateData.mediaUrl}
-            onChange={handleInputChange}
-            className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={isSubmitting}
-          />
-        </div>
+          {/* Media Filename */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Media Filename</label>
+            <input
+              type="text"
+              name="mediaFilename"
+              value={templateData.mediaFilename}
+              onChange={handleInputChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter Media Filename"
+            />
+          </div>
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Media Filename</label>
-          <input
-            type="text"
-            name="mediaFilename"
-            value={templateData.mediaFilename}
-            onChange={handleInputChange}
-            className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={isSubmitting}
-          />
-        </div>
+          {/* Source */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Source</label>
+            <input
+              type="text"
+              name="source"
+              value={templateData.source}
+              onChange={handleInputChange}
+              className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter Source"
+            />
+          </div>
 
-        {/* Submit and Cancel Buttons */}
-        <div className="flex justify-end space-x-4">
-          <button
-            type="button"
-            className={`bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none ${
-              isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Saving...' : 'Save Template'}
-          </button>
-          <button
-            type="button"
-            className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:outline-none"
-            onClick={closePopup}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </button>
-        </div>
+          {/* Submit and Cancel Buttons */}
+          <div className="flex justify-end space-x-4">
+            <button
+              type="submit"
+              className={`bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none ${
+                isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Saving...' : 'Save Template'}
+            </button>
+            <button
+              type="button"
+              className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:outline-none"
+              onClick={() => closePopup()}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

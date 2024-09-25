@@ -5,7 +5,8 @@ import CreateTemplate from "./CreateTemplate"; // Import the CreateTemplate comp
 import { FaTrashAlt, FaPlus } from "react-icons/fa"; // Using FontAwesome icons for better scalability
 import { toast } from "react-toastify"; // Assuming you're using react-toastify for notifications
 import Spinner from "./Spinner"; // Optional: A spinner component for loading states
-import ConfirmModal from "./ConfirmModal"; // Optional: A custom confirmation modal
+import ConfirmModal from "./ConfirmModal"; 
+import { SlRefresh } from "react-icons/sl";// Optional: A custom confirmation modal
 
 const Campaign = ({ templateData = [], fetchTemplateData }) => {
   const rowsPerPage = 100; // Define how many rows per page
@@ -102,7 +103,13 @@ const Campaign = ({ templateData = [], fetchTemplateData }) => {
     <div className="py-6 px-8">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">Template Listing</h2>
+        <div className="flex  justify-center gap-2">
+<h2 className="text-2xl font-semibold">Template Listing</h2>
+        <button className="   items-center text-black rounded-lg  font-bold" onClick={() => fetchTemplateData()}> 
+        <SlRefresh className=" rounded-full text-xl items" /></button>
+
+        </div>
+        
         <button
           className="flex items-center bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-200"
           onClick={handleOpenPopup}

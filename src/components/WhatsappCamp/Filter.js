@@ -44,7 +44,7 @@ const Filter = ({
   const safeArray = (array) => (Array.isArray(array) ? array : []);
 
   // Extract unique values for each filter, handling nulls as "n/a"
-  const uniqueKYCOptions = ["Yes", "No"];
+  const uniqueKYCOptions = ["yes", "no"];
 
   const uniqueReferralModes = [
     ...new Set(
@@ -187,38 +187,36 @@ const Filter = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* KYC Filter */}
           <div>
-            <label className="block text-lg font-medium text-gray-700 mb-2">
-              KYC
-            </label>
-            <div className="flex space-x-4">
-              {uniqueKYCOptions.map((kycOption) => (
-                <label key={kycOption} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="kyc"
-                    value={kycOption}
-                    checked={selectedKYC.includes(kycOption)}
-                    onChange={() => {
-                      setSelectedKYC((prev) =>
-                        prev.includes(kycOption)
-                          ? prev.filter((item) => item !== kycOption)
-                          : [...prev, kycOption]
-                      );
-                    }}
-                    className="hidden"
-                  />
-                  <span
-                    className={`w-5 h-5 mr-2 border-2 border-gray-500 rounded-sm cursor-pointer ${
-                      selectedKYC.includes(kycOption)
-                        ? "bg-blue-500"
-                        : "bg-white"
-                    }`}
-                  ></span>
-                  {kycOption}
-                </label>
-              ))}
-            </div>
-          </div>
+  <label className="block text-lg font-medium text-gray-700 mb-2">
+    KYC
+  </label>
+  <div className="flex space-x-4">
+    {uniqueKYCOptions.map((kycOption) => (
+      <label key={kycOption} className="flex items-center cursor-pointer">
+        {/* Hidden Radio Input */}
+        <input
+          type="radio"
+          name="kyc"
+          value={kycOption}
+          checked={selectedKYC === kycOption}
+          onChange={() => setSelectedKYC(kycOption)}
+          className="hidden"
+        />
+        
+        {/* Custom Styled Square Radio */}
+        <span
+          className={`w-5 h-5 mr-2 border-2 border-gray-500 rounded-sm flex-shrink-0 ${
+            selectedKYC === kycOption ? "bg-blue-500" : "bg-white"
+          } transition-colors duration-200`}
+        ></span>
+        
+        {/* Option Label */}
+        {kycOption}
+      </label>
+    ))}
+  </div>
+</div>
+
 
           {/* Referral Mode Filter */}
           <div>

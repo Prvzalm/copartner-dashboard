@@ -1,6 +1,7 @@
 // src/components/Group.jsx
 import React, { useState } from "react";
-import { FaTrashCan } from "react-icons/fa6"; // Using FontAwesome icon for better scalability
+import { FaTrashCan } from "react-icons/fa6";
+import { SlRefresh } from "react-icons/sl"; // Using FontAwesome icon for better scalability
 import { toast } from "react-toastify"; // Assuming you're using react-toastify for notifications
 import PropTypes from "prop-types"; // For prop type checking
 
@@ -100,16 +101,19 @@ const Group = ({ groupData = [], fetchGroupData }) => {
     <div className="py-6 px-8">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">Group Data</h2>
-        {/* Optional: Add Bulk Delete or Create Group Button */}
-        {/* <button
-          className="flex items-center bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-200"
-          onClick={handleBulkDelete}
-          disabled={isDeleting}
-        >
-          <FaTrashCan className="mr-2" />
-          Delete Selected
-        </button> */}
+        <div className=" flex justify-center gap-2">
+          <div>
+            <h2 className="text-2xl font-semibold">Group Data</h2>
+
+          </div>
+           
+        <button className=" items-center text-white rounded-full font-bold" onClick={() => fetchGroupData()}>
+          
+        <SlRefresh className=" text-black rounded-full text-xl items" /> 
+                        </button>
+        </div>
+       
+       
       </div>
 
       {/* Table Container with Horizontal Scrolling */}
@@ -143,6 +147,7 @@ const Group = ({ groupData = [], fetchGroupData }) => {
                       </td>
                       <td className="px-4 py-2 text-center">{time}</td>
                       <td className="px-4 py-2 text-center">
+                        
                         <button
                           className={`flex items-center justify-center bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition duration-200 ${
                             deletingGroupIds.includes(groupId)
