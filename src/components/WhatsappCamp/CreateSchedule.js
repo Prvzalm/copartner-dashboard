@@ -1,5 +1,3 @@
-// src/components/CreateSchedule.jsx
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios'; // For API calls
 import DatePicker from 'react-datepicker'; // For calendar date & time picking
@@ -90,16 +88,29 @@ const CreateSchedule = ({ closePopup, fetchScheduleGroupData }) => {
 
       const response = await axios.post('https://whatsapp.copartner.in/api/schedule-groups', payload);
 
-      if (response.status === 201) {
-        toast.success('Schedule group created successfully.');
-        closePopup(true); // Close popup and trigger data refresh
-        fetchScheduleGroupData(); // Refresh data
-      } else {
-        throw new Error('Failed to create schedule group.');
-      }
+      console.log('Response from server:', response);
+
+      // No need to check response.status, if the request didn't throw an error, it was successful
+      toast.success('Schedule group created successfully.');
+      closePopup(true); // Close popup and trigger data refresh
+      fetchScheduleGroupData(); // Refresh data
+
     } catch (error) {
       console.error('Error creating schedule group:', error);
-      toast.error('An error occurred while creating the schedule group.');
+
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        console.error('Server responded with:', error.response.data);
+        toast.error(`Error: ${error.response.data.message || 'An error occurred while creating the schedule group.'}`);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('No response received:', error.request);
+        toast.error('No response from the server. Please try again.');
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error:', error.message);
+        toast.error('An error occurred. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -125,7 +136,7 @@ const CreateSchedule = ({ closePopup, fetchScheduleGroupData }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md relative">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md relative max-h-[80vh] overflow-y-auto">
         {/* Close Button */}
         <button
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
