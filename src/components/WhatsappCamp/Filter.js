@@ -418,34 +418,7 @@ const Filter = ({
           </div>
 
           {/* Group Filter */}
-          <div>
-            <label className="block text-lg font-medium text-gray-700 mb-2">
-              Group
-            </label>
-            <Select
-              isMulti
-              options={formatOptions(uniqueGroups)}
-              value={selectedGroup.map((group) => ({
-                value: group,
-                label:
-                  group === "n/a"
-                    ? "N/A"
-                    : group
-                        .split(" ")
-                        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                        .join(" "),
-              }))}
-              onChange={(selectedOptions) =>
-                setSelectedGroup(
-                  selectedOptions
-                    ? selectedOptions.map((option) => option.value)
-                    : []
-                )
-              }
-              placeholder="Select Groups"
-              classNamePrefix="react-select"
-            />
-          </div>
+      
 
           {/* Date Range Filter */}
           <div>
