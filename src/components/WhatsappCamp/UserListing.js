@@ -1,268 +1,305 @@
-import React, { useState, useEffect } from 'react';
-
-import CreateGroup from './CreateGroup';
+// src/components/UserListing.jsx
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { FixedSizeList as List } from "react-window";
+import CreateGroup from "./CreateGroup"; // Ensure this path is correct
 
 const UserListing = ({ apDetails }) => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [showPopup, setShowPopup] = useState(false);
   const [selectAll, setSelectAll] = useState(false);
 
-  // Helper function to map serviceType values to corresponding strings
+  /**
+   * Maps serviceType values to corresponding strings.
+   */
   const mapServiceType = (serviceType) => {
     switch (serviceType) {
-      case '1':
-        return 'Commodity';
-      case '2':
-        return 'Equity';
-      case '3':
-        return 'F&O';
+      case "1":
+        return "Commodity";
+      case "2":
+        return "Equity";
+      case "3":
+        return "F&O";
       default:
-        return 'Unknown';
+        return "Unknown";
     }
   };
 
-  // Toggle checkbox for individual users
- // Toggle checkbox for individual users
-// Toggle checkbox for individual users
-// Toggle checkbox for individual users
-const handleCheckboxChange = (user) => {
-  console.log('User selected:', user);  // Log user data to verify what you receive
+  /**
+   * Logs the combinedUserData for debugging purposes.
+   */
+  useEffect(() => {
+    console.log("UserListing - apDetails prop:", apDetails);
+  }, [apDetails]);
 
-  // Safely access the `raName` from the subscriptions array
-  const raName = user.subscriptions && user.subscriptions.length > 0
-    ? user.subscriptions[0].RAname
-    : 'N/A';  // Fallback if no RAname is found
+  /**
+   * Flattens the combined user data into a flat list.
+   * Each user is followed by their subscriptions as sub rows.
+   */
+  const flattenedData = useMemo(() => {
+    const flatList = [];
+    apDetails.forEach((user) => {
+      flatList.push({ type: "user", data: user });
+      if (user.subscriptions && user.subscriptions.length > 0) {
+        user.subscriptions.forEach((sub) => {
+          flatList.push({ type: "subscription", data: sub });
+        });
+      }
+    });
+    console.log("UserListing - Flattened Data Sample:", flatList.slice(0, 10));
+    return flatList;
+  }, [apDetails]);
 
-  const userExists = selectedUsers.find((u) => u.userId === user.id);
+  /**
+   * Toggles the selection of an individual user.
+   * Only main user rows can be selected.
+   */
+  const handleCheckboxChange = (user) => {
+    console.log("User selected/deselected:", user); // Debugging
 
-  if (userExists) {
-    setSelectedUsers(selectedUsers.filter((u) => u.userId !== user.id));
-  } else {
-    setSelectedUsers([
-      ...selectedUsers,
-      {
-        userId: user.id,
-        raName: raName,  
-        name: user.name,
-        mobileNumber: user.mobileNumber,
-      },
-    ]);
-  }
+    const userExists = selectedUsers.find((u) => u.userId === user.id);
 
-  // Log the updated selectedUsers state to ensure the raName is properly added
-  console.log('Updated selectedUsers:', selectedUsers);
-};
+    if (userExists) {
+      // Deselect user
+      const updatedSelection = selectedUsers.filter((u) => u.userId !== user.id);
+      setSelectedUsers(updatedSelection);
+      console.log("User deselected:", user.id);
+    } else {
+      // Select user
+      const updatedSelection = [
+        ...selectedUsers,
+        {
+          userId: user.id,
+          raNames: user.subscriptions.map((sub) => sub.RAname) || ["N/A"],
+          name: user.name || "N/A",
+          mobileNumber: user.mobileNumber || "N/A",
+        },
+      ];
+      setSelectedUsers(updatedSelection);
+      console.log("User selected:", user.id);
+    }
+  };
 
-
-
-
-  // Select or Deselect all users on the current page
+  /**
+   * Toggles the selection of all users.
+   */
   const handleSelectAll = () => {
     if (selectAll) {
-      setSelectedUsers([]); // Deselect all
+      // Deselect all users
+      setSelectedUsers([]);
+      console.log("All users deselected");
     } else {
-      
-      const usersToSelect = currentData.map((user) => ({
-        
+      // Select all users
+      const allUsers = apDetails.map((user) => ({
         userId: user.id,
-        raName: user.subscriptions && user.subscriptions.length > 0 ? user.subscriptions[0].RAname : "N/A",
-        name: user.name,
-        mobileNumber: user.mobileNumber,
-        
+        raNames: user.subscriptions.map((sub) => sub.RAname) || ["N/A"],
+        name: user.name || "N/A",
+        mobileNumber: user.mobileNumber || "N/A",
       }));
-      setSelectedUsers(usersToSelect);
+      setSelectedUsers(allUsers);
+      console.log("All users selected");
     }
     setSelectAll(!selectAll);
   };
 
-  const rowsPerPage = 500; // Set the number of rows per page
-  const [currentPage, setCurrentPage] = useState(1);
-
-  // Calculate the total number of pages, handling empty or undefined data gracefully
-  const totalPages = apDetails && apDetails.length ? Math.ceil(apDetails.length / rowsPerPage) : 1;
-
-  // Get the data for the current page, handling empty or undefined data
-  const currentData = apDetails && apDetails.length
-    ? apDetails.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
-    : [];
-
-  // Handle pagination controls
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-      setSelectAll(false); // Reset the selectAll state
-    }
-  };
-
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-      setSelectAll(false); // Reset the selectAll state
-    }
-  };
-
-  // Calculate the number of filtered users and the current page's users
-  const filteredUsersCount = apDetails.length;
-  const usersOnCurrentPageCount = currentData.length;
-
+  /**
+   * Keeps the "Select All" checkbox in sync with individual selections.
+   */
   useEffect(() => {
-    // If all users are selected, keep the checkbox state in sync
-    const allSelected = currentData.length > 0 && currentData.every((user) =>
-      selectedUsers.some((u) => u.userId === user.id)
-    );
+    const mainUserCount = apDetails.length;
+    const selectedMainUserCount = selectedUsers.length;
+    const allSelected = mainUserCount > 0 && selectedMainUserCount === mainUserCount;
     setSelectAll(allSelected);
-  }, [currentData, selectedUsers]);
+  }, [selectedUsers, apDetails]);
+
+  /**
+   * Row component for react-window virtualization.
+   */
+  const Row = useCallback(
+    ({ index, style }) => {
+      const item = flattenedData[index];
+
+      if (item.type === "user") {
+        const user = item.data;
+        const isSelected = selectedUsers.some((u) => u.userId === user.id);
+
+        return (
+          <div
+            style={style}
+            className={`flex border-b bg-white`}
+          >
+            {/* Selection Checkbox */}
+            <div className="w-1/12 p-2 flex justify-center items-center">
+              <input
+                type="checkbox"
+                onChange={() => handleCheckboxChange(user)}
+                checked={isSelected}
+              />
+            </div>
+            {/* Date */}
+            <div className="w-2/12 p-2">
+              {user.createdOn
+                ? new Date(user.createdOn).toLocaleDateString()
+                : "N/A"}
+            </div>
+            {/* Name */}
+            <div className="w-2/12 p-2">
+              {user.name || "N/A"}
+            </div>
+            {/* Mobile Number */}
+            <div className="w-2/12 p-2">
+              {user.mobileNumber || "N/A"}
+            </div>
+            {/* KYC */}
+            <div className="w-1/12 p-2 text-center">
+              {user.isKYC ? "Yes" : "No"}
+            </div>
+            {/* Referral Mode */}
+            <div className="w-1/12 p-2">
+              {user.referralMode || "N/A"}
+            </div>
+            {/* Landing URL */}
+            <div className="w-1/12 p-2">
+              {user.landingPageUrl || "N/A"}
+            </div>
+            {/* RA Name(s) */}
+            <div className="w-2/12 p-2">
+              {user.subscriptions.length > 0
+                ? user.subscriptions
+                    .map((sub) => sub.RAname || "N/A")
+                    .join(", ")
+                : "N/A"}
+            </div>
+            {/* Amount(s) */}
+            <div className="w-2/12 p-2">
+              {user.subscriptions.length > 0
+                ? user.subscriptions
+                    .map((sub) => (sub.amount ? `₹${sub.amount.toFixed(2)}` : "N/A"))
+                    .join(", ")
+                : "N/A"}
+            </div>
+            {/* Subscription Name(s) */}
+            <div className="w-2/12 p-2">
+              {user.subscriptions.length > 0
+                ? user.subscriptions
+                    .map((sub) => sub.planType || "N/A")
+                    .join(", ")
+                : "N/A"}
+            </div>
+            {/* Subscription Type(s) */}
+            <div className="w-2/12 p-2">
+              {user.subscriptions.length > 0
+                ? user.subscriptions
+                    .map((sub) => mapServiceType(sub.serviceType))
+                    .join(", ")
+                : "N/A"}
+            </div>
+          </div>
+        );
+      } else if (item.type === "subscription") {
+        const sub = item.data;
+
+        return (
+          <div
+            style={style}
+            className={`flex border-b bg-gray-100`}
+          >
+            {/* Empty Checkbox Space */}
+            <div className="w-1/12 p-2"></div>
+            {/* Empty Date Space */}
+            <div className="w-2/12 p-2"></div>
+            {/* Empty Name Space */}
+            <div className="w-2/12 p-2"></div>
+            {/* Empty Mobile Number Space */}
+            <div className="w-2/12 p-2"></div>
+            {/* Empty KYC Space */}
+            <div className="w-1/12 p-2 text-center"></div>
+            {/* Empty Referral Mode Space */}
+            <div className="w-1/12 p-2"></div>
+            {/* Empty Landing URL Space */}
+            <div className="w-1/12 p-2"></div>
+            {/* RA Name */}
+            <div className="w-2/12 p-2 pl-6">
+              {sub.RAname || "N/A"}
+            </div>
+            {/* Amount */}
+            <div className="w-2/12 p-2 pl-6">
+              {sub.amount ? `₹${sub.amount.toFixed(2)}` : "N/A"}
+            </div>
+            {/* Subscription Name */}
+            <div className="w-2/12 p-2 pl-6">
+              {sub.planType || "N/A"}
+            </div>
+            {/* Subscription Type */}
+            <div className="w-2/12 p-2 pl-6">
+              {mapServiceType(sub.serviceType)}
+            </div>
+          </div>
+        );
+      } else {
+        return null;
+      }
+    },
+    [flattenedData, selectedUsers]
+  );
 
   return (
     <div className="py-4 px-8">
-      <div className='flex justify-between'>
-      <h2 className="pl-3 text-xl font-semibold whitespace-nowrap">
-    User Listing
-    <small className="ml-2 text-sm font-light">
-      ({apDetails.length} total users, {currentData.length} on this page)
-    </small>
-  </h2>
-  <button
-      className="border rounded-lg border-black p-2"
-      onClick={() => setShowPopup(true)}
-    >
-      Create Group
-    </button>
-      </div>
-      <div className="table-container overflow-x-auto">
+      {/* Header Section */}
       <div className="flex justify-between items-center mb-4">
-  
-  <div className="ml-auto">
-    
-  </div>
-</div>
-
-
-        <table className="table-list min-w-max">
-          <thead>
-            <tr className="requestColumns">
-              <th style={{ textAlign: 'left', paddingLeft: '2rem' }}>
-                <input
-                  type="checkbox"
-                  checked={selectAll}
-                  onChange={handleSelectAll}
-                />
-              </th>
-              <th style={{ textAlign: 'left', paddingLeft: '2rem' }}>Date</th>
-              <th style={{ textAlign: 'left' }}>Name</th>
-              <th>Email</th>
-              <th>Mobile</th>
-              <th>isKYC</th>
-              <th>ReferralMode</th>
-              <th>Landing URL</th>
-              <th>RA Name</th>
-              <th>Amount</th>
-              <th>Subscription Name</th>
-              <th>Sub.Type</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentData.length > 0 ? (
-              currentData.map((apdetail) => {
-                const hasMultipleSubscriptions = apdetail.subscriptions && apdetail.subscriptions.length > 1;
-
-                return (
-                  <React.Fragment key={apdetail.id}>
-                    <tr className="request-numbers font-semibold">
-                      <td
-                        style={{ textAlign: 'left', paddingLeft: '2rem' }}
-                        className="p-3"
-                      >
-                        <input
-                          type="checkbox"
-                          onChange={() => handleCheckboxChange(apdetail)}
-                          checked={selectedUsers.some((u) => u.userId === apdetail.id)}
-                        />
-                      </td>
-                      <td style={{ textAlign: 'left' }} className="p-3">
-                        {apdetail.createdOn ? new Date(apdetail.createdOn).toLocaleDateString() : 'N/A'}
-                      </td>
-                      <td style={{ textAlign: 'left' }} className="p-3">
-                        {apdetail.name || 'N/A'}
-                      </td>
-                      <td className="p-3">{apdetail.email || 'N/A'}</td>
-                      <td className="p-3">{apdetail.mobileNumber || 'N/A'}</td>
-                      <td className="p-3">{apdetail.isKYC ? 'Yes' : 'No'}</td>
-                      <td className="p-3">{apdetail.referralMode || 'N/A'}</td>
-                      <td className="p-3">{apdetail.landingPageUrl || 'N/A'}</td>
-                      <td className="p-3">
-                        {apdetail.subscriptions && apdetail.subscriptions.length > 0
-                          ? apdetail.subscriptions[0].RAname || 'N/A'
-                          : 'N/A'}
-                      </td>
-                      <td className="p-3">
-                        {apdetail.subscriptions && apdetail.subscriptions.length > 0 && apdetail.subscriptions[0].amount
-                          ? `${apdetail.subscriptions[0].amount}`
-                          : 'N/A'}
-                      </td>
-                      <td className="p-3">
-                        {apdetail.subscriptions && apdetail.subscriptions.length > 0
-                          ? apdetail.subscriptions[0].planType || 'N/A'
-                          : 'N/A'}
-                      </td>
-                      <td className="p-3">
-                        {apdetail.subscriptions && apdetail.subscriptions.length > 0
-                          ? mapServiceType(apdetail.subscriptions[0].serviceType)
-                          : 'N/A'}
-                      </td>
-                    </tr>
-                    {hasMultipleSubscriptions &&
-                      apdetail.subscriptions.slice(1).map((subscription, index) => (
-                        <tr key={`${apdetail.id}-sub-${index}`} className="subscription-row">
-                          <td></td> {/* Empty cells for alignment */}
-                          <td></td>
-                          <td></td>
-                          <td></td>
-                          <td></td>
-                          <td></td>
-                          <td></td>
-                          <td className="p-3">{subscription.RAname || 'N/A'}</td>
-                          <td className="p-3">{subscription.amount || 'N/A'}</td>
-                          <td className="p-3">{subscription.planType || 'N/A'}</td>
-                          <td className="p-3">{mapServiceType(subscription.serviceType) || 'N/A'}</td>
-                        </tr>
-                      ))}
-                  </React.Fragment>
-                );
-              })
-            ) : (
-              <tr>
-                <td colSpan="12" className="text-center p-3">
-                  No data available
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination controls */}
-      <div className="pagination-controls mt-4 flex justify-center items-center">
+        <h2 className="text-xl font-semibold">
+          User Listing
+          <span className="ml-2 text-sm font-light">
+            ({apDetails.length} total users)
+          </span>
+        </h2>
         <button
-          className="btn btn-primary mx-2 border border-black rounded-lg p-1"
-          onClick={handlePreviousPage}
-          disabled={currentPage === 1}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
+          onClick={() => setShowPopup(true)}
         >
-          Prev
-        </button>
-        <span className="mx-2">
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          className="btn btn-primary mx-2 border border-black rounded-lg p-1"
-          onClick={handleNextPage}
-          disabled={currentPage === totalPages}
-        >
-          Next
+          Create Group
         </button>
       </div>
 
-      {/* Show Popup */}
+      {/* Table Header */}
+      <div className="flex border-b bg-gray-200">
+        <div className="w-1/12 p-2 flex justify-center items-center">
+          <input
+            type="checkbox"
+            onChange={handleSelectAll}
+            checked={selectAll}
+          />
+        </div>
+        <div className="w-2/12 p-2 font-bold">Date</div>
+        <div className="w-2/12 p-2 font-bold">Name</div>
+        {/* Removed Email Column */}
+        <div className="w-2/12 p-2 font-bold">Mobile</div>
+        <div className="w-1/12 p-2 font-bold text-center">KYC</div>
+        <div className="w-1/12 p-2 font-bold">Referral Mode</div>
+        <div className="w-1/12 p-2 font-bold">Landing URL</div>
+        <div className="w-2/12 p-2 font-bold">RA Name</div>
+        <div className="w-2/12 p-2 font-bold">Amount</div>
+        <div className="w-2/12 p-2 font-bold">Subscription Name</div>
+        <div className="w-2/12 p-2 font-bold">Sub.Type</div>
+      </div>
+
+      {/* Virtualized List */}
+      <List
+        height={600} // Adjust based on your UI needs
+        itemCount={flattenedData.length}
+        itemSize={50} // Adjust based on row height
+        width={"100%"}
+      >
+        {Row}
+      </List>
+
+      {/* Selected Users Count */}
+      <div className="mt-4">
+        <p>
+          Selected Users: <strong>{selectedUsers.length}</strong>
+        </p>
+      </div>
+
+      {/* Create Group Popup */}
       {showPopup && (
         <CreateGroup
           selectedUsers={selectedUsers}
