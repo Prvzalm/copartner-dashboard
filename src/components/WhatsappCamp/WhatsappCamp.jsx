@@ -31,7 +31,7 @@ const WhatsappCamp = () => {
   const fetchAllUsers = async () => {
     let allUsers = [];
     let page = 1;
-    const pageSize = 1000; // Adjust based on API limits
+    const pageSize = 10000; // Adjust based on API limits
     let hasMore = true;
 
     while (hasMore) {
@@ -115,13 +115,7 @@ const WhatsappCamp = () => {
           console.log(`Fetching subscription data for userId: ${userId}`);
           const response = await fetch(
             `https://copartners.in:5009/api/Subscriber/GetByUserId/${userId}`
-            // Include headers if authentication is required
-            // {
-            //   headers: {
-            //     Authorization: `Bearer YOUR_ACCESS_TOKEN`,
-            //     // ...other headers
-            //   },
-            // }
+          
           );
 
           console.log(`Subscription API Status for user ${userId}:`, response.status);
