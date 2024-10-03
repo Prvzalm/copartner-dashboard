@@ -147,6 +147,12 @@ const Sidebar = () => {
       label: "Whatsapp Camp",
       icon: userIcon,
     },
+    {
+      to: "/posters",
+      title: "Settings",
+      label: "Posters",
+      icon: userIcon,
+    },
   ];
 
   return (
@@ -175,7 +181,7 @@ const Sidebar = () => {
       <aside
         ref={sidebarRef}
         id="logo-sidebar"
-        className={`fixed top-0 left-0 z-40 w-60 h-screen transition-transform bg-gray-50 ${
+        className={`fixed top-0 left-0 w-60 h-screen transition-transform bg-gray-50 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full sm:translate-x-0"
         }`}
         aria-label="Sidebar"

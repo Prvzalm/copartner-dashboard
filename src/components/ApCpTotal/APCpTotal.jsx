@@ -95,7 +95,7 @@ const ApCpTotal = () => {
             }
 
             const invoiceResponse = await fetch(
-              `https://copartners.in:5132/api/RADashboard/GetRAInvoice/${ra.id}?page=1&pageSize=10000`
+              `https://copartners.in:5132/api/RADashboard/GetRAInvoice/${ra.id}?page=1&pageSize=100000`
             );
 
             if (!invoiceResponse.ok) {
@@ -170,7 +170,7 @@ const ApCpTotal = () => {
             }
 
             const invoiceResponse = await fetch(
-              `https://copartners.in:5133/api/APDashboard/GetAPInvoice/${ap.id}?page=1&pageSize=10000`
+              `https://copartners.in:5133/api/APDashboard/GetAPInvoice/${ap.id}?page=1&pageSize=100000`
             );
 
             if (!invoiceResponse.ok) {

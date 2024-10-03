@@ -9,7 +9,6 @@ import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 
 const RAPage = () => {
-  const [rpData, setRpData] = useState([]);
   const [expertsData, setExpertsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totals, setTotals] = useState({
@@ -35,13 +34,12 @@ const RAPage = () => {
     const fetchRAData = async () => {
       try {
         const response = await fetch(
-          "https://copartners.in:5132/api/RADashboard/DashboardRAListing?page=1&pageSize=10000"
+          "https://copartners.in:5132/api/RADashboard/DashboardRAListing?page=1&pageSize=100000"
         );
         if (!response.ok) {
           throw new Error("Something went wrong, status " + response.status);
         }
         const data = await response.json();
-        setRpData(data.data);
         setFilteredData(data.data); // Set initially filtered data to all data
       } catch (error) {
         toast.error(`Failed to fetch data: ${error.message}`);
@@ -51,7 +49,7 @@ const RAPage = () => {
     const fetchExpertsData = async () => {
       try {
         const expertsResponse = await fetch(
-          "https://copartners.in:5132/api/Experts?page=1&pageSize=10000"
+          "https://copartners.in:5132/api/Experts?page=1&pageSize=100000"
         );
         if (!expertsResponse.ok) {
           throw new Error(`Failed to fetch experts: ${expertsResponse.status}`);
@@ -62,7 +60,7 @@ const RAPage = () => {
         const updatedExpertsData = await Promise.all(
           expertsList.map(async (expert) => {
             const raInvoiceResponse = await fetch(
-              `https://copartners.in:5132/api/RADashboard/GetRAInvoice/${expert.id}?page=1&pageSize=10000`
+              `https://copartners.in:5132/api/RADashboard/GetRAInvoice/${expert.id}?page=1&pageSize=100000`
             );
             if (!raInvoiceResponse.ok) {
               throw new Error(

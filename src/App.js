@@ -42,6 +42,7 @@ import Onboarding from "./components/Onboarding/Onboarding";
 import RAReview from "./components/RAReview/RAReview";
 import WhatsappCamp from "./components/WhatsappCamp/WhatsappCamp";
 import APReview from "./components/APReview/APReview";
+import Poster from "./components/Posters/Poster";
 
 const App = () => {
   const token = sessionStorage.getItem("creds");
@@ -82,6 +83,7 @@ const App = () => {
           <Route path="Onboarding/:onBoardId" element={<RAReview />} />
           <Route path="Onboarding/RA/:onBoardId" element={<RAReview />} />
           <Route path="Onboarding/AP/:onBoardAPId" element={<APReview />} />
+          <Route path="posters" element={<Poster />} />
         </Route>
         <Route path="signup" element={<Signup />} />
       </>
