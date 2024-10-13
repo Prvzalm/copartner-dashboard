@@ -18,7 +18,7 @@ const JoinPopup = ({ closeJoin, fetchChannels }) => {
   const fetchChannelData = async () => {
     try {
       const response = await axios.get(
-        "https://api.hailgrotech.com/api/chatmembers/getChannelData"
+        "https://phonepe.copartner.in/api/getChannelData"
       );
       setChannels(response.data);
     } catch (error) {
@@ -41,7 +41,7 @@ const JoinPopup = ({ closeJoin, fetchChannels }) => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "https://api.hailgrotech.com/api/chatmembers/joinBotChannel",
+        "https://phonepe.copartner.in/api/joinBotChannel",
         {
           chatId: selectedChannel,
           channelName: name,

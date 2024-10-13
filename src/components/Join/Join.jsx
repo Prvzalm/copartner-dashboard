@@ -17,7 +17,7 @@ const Join = () => {
   const fetchChannels = async () => {
     try {
       const response = await axios.get(
-        "https://api.hailgrotech.com/api/chatmembers/getJoinBotData"
+        "https://phonepe.copartner.in/api/getJoinBotData"
       );
       setChannels(response.data);
     } catch (error) {
