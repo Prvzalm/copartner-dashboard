@@ -71,7 +71,7 @@ const RAPage = () => {
             const invoices = raInvoiceData.data;
 
             const usersPaid = invoices.reduce(
-              (sum, invoice) => sum + (invoice.amount || 0),
+              (sum, invoice) => sum + (invoice.totalAmount || 0),
               0
             );
 
