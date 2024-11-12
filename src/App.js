@@ -90,7 +90,7 @@ const App = () => {
           <Route path="Onboarding/AP/:onBoardAPId" element={<APReview />} />
 
           <Route path="posters" element={<Poster />} />
-          <Route path="bannerImages" element={<BannerAdmin />} />
+          {/* <Route path="bannerImages" element={<BannerAdmin />} /> */}
 
           <Route path="Banner" element={<Banner />} />
 

@@ -68,12 +68,12 @@ const Sidebar = () => {
       label: "A.P Details",
       icon: IoSettingsOutline,
     },
-    {
-      to: "/bannerImages",
-      title: "Settings",
-      label: "Banner Images",
-      icon: IoSettingsOutline,
-    },
+    // {
+    //   to: "/bannerImages",
+    //   title: "Settings",
+    //   label: "Banner Images",
+    //   icon: IoSettingsOutline,
+    // },
     {
       to: "/Onboarding",
       title: "Onboarding",
