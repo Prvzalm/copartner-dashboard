@@ -321,21 +321,21 @@ const WhatsappCamp = () => {
   /**
    * Filtering logic that processes all subscriptions for each user.
    */
-  const exportToExcel = (data, fileName = 'data.xlsx') => {
-    // Convert JSON data to a worksheet
-    const worksheet = XLSX.utils.json_to_sheet(data);
+  // const exportToExcel = (data, fileName = 'data.xlsx') => {
+  //   // Convert JSON data to a worksheet
+  //   const worksheet = XLSX.utils.json_to_sheet(data);
   
-    // Create a workbook and append the worksheet
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+  //   // Create a workbook and append the worksheet
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
   
-    // Generate a binary Excel file
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  //   // Generate a binary Excel file
+  //   const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
   
-    // Convert buffer to a Blob and save it
-    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    saveAs(blob, fileName);
-  };
+  //   // Convert buffer to a Blob and save it
+  //   const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  //   saveAs(blob, fileName);
+  // };
   const filteredUserData = useMemo(() => {
     if (!filters) return combinedUserData;
 
@@ -608,10 +608,10 @@ const WhatsappCamp = () => {
           {/* Filter and Clear Filter Buttons (Only in UserListing View) */}
           {currentView === "UserListing" && (
             <div>
-               <button  className="btn btn-secondary mx-2 border border-green-500 rounded-xl p-2"
-               onClick={() => exportToExcel(filteredUserData, 'MyData.xlsx')}>
+               {/* <button  className="btn btn-secondary mx-2 border border-green-500 rounded-xl p-2"
+               onClick={() => exportToExcel(apDetails, 'MyData.xlsx')}>
         Download Data
-      </button>
+      </button> */}
               <button
                 className="btn btn-secondary mx-2 border border-black rounded-lg p-2"
                 onClick={() => setFilterVisible(true)}

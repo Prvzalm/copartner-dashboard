@@ -1,10 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { BiLogOut } from "react-icons/bi";
 import { IoSettingsOutline } from "react-icons/io5";
 import Logo from "../../assets/copartner.png";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import userIcon from "../../assets/user-octagon.png";
-import { click } from "@testing-library/user-event/dist/click";
 import { ToastContainer } from "react-toastify";
 
 const Sidebar = () => {
@@ -31,14 +30,18 @@ const Sidebar = () => {
     }
   };
 
-  document.addEventListener("mousedown", handleClickOutside);
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const isLinkActive = (path) => {
     return location.pathname === path;
   };
 
   const links = [
-    // { to: "/notification", title: "Notification", label: "Notification", icon: userIcon },
     { to: "/", title: "Dashboard", label: "A.P", icon: userIcon },
     { to: "/r.a", title: "Overview", label: "R.A", icon: userIcon },
     {
@@ -49,19 +52,19 @@ const Sidebar = () => {
     },
     {
       to: "/blogs",
-      title: "Settings",
+      title: "Blog Upload",
       label: "Blog Upload",
       icon: IoSettingsOutline,
     },
     {
       to: "/radetails",
-      title: "Settings",
+      title: "R.A Details",
       label: "R.A Details",
       icon: IoSettingsOutline,
     },
     {
       to: "/apdetails",
-      title: "Settings",
+      title: "A.P Details",
       label: "A.P Details",
       icon: IoSettingsOutline,
     },
@@ -73,84 +76,89 @@ const Sidebar = () => {
     },
     {
       to: "/Onboarding",
-      title: "Settings",
+      title: "Onboarding",
       label: "Onboarding",
       icon: userIcon,
     },
     {
       to: "/minisub",
-      title: "Settings",
+      title: "Mini Sub",
       label: "Mini Sub",
       icon: IoSettingsOutline,
     },
-
     {
       to: "/agencylist",
-      title: "Settings",
+      title: "Ad Agency",
       label: "Ad Agency",
       icon: userIcon,
     },
     {
       to: "/transaction",
-      title: "Settings",
+      title: "Transaction",
       label: "Transaction",
       icon: userIcon,
     },
     {
       to: "/marketingcontent",
-      title: "Settings",
+      title: "Marketing Content",
       label: "Marketing Content",
       icon: userIcon,
     },
-    { to: "/userdata", title: "Settings", label: "User Data", icon: userIcon },
+    { to: "/userdata", title: "User Data", label: "User Data", icon: userIcon },
     {
       to: "/relationship",
-      title: "Settings",
+      title: "Relationship Management",
       label: "Relationship Management",
       icon: userIcon,
     },
-    { to: "/join", title: "Settings", label: "Join", icon: userIcon },
+    { to: "/join", title: "Join", label: "Join", icon: userIcon },
     {
       to: "/sub-admin",
-      title: "Settings",
+      title: "Sub Admin Management",
       label: "Sub Admin Management",
       icon: userIcon,
     },
     {
       to: "/login",
-      title: "Settings",
+      title: "Login Credentials",
       label: "Login Credentials",
       icon: userIcon,
     },
     {
       to: "/rauserdata",
-      title: "Settings",
+      title: "RA User Data",
       label: "RA User Data",
       icon: userIcon,
     },
-    { to: "/chatids", title: "Settings", label: "Chat IDs", icon: userIcon },
+    { to: "/chatids", title: "Chat IDs", label: "Chat IDs", icon: userIcon },
     {
       to: "/telegrampage",
-      title: "Settings",
+      title: "Telegram Page",
       label: "Telegram Page",
       icon: userIcon,
     },
     {
       to: "/CPDiscount",
-      title: "Settings",
+      title: "CP Discount",
       label: "CP Discount",
       icon: userIcon,
     },
     {
       to: "/WhatsappCamp",
-      title: "Settings",
+      title: "Whatsapp Camp",
       label: "Whatsapp Camp",
       icon: userIcon,
     },
     {
       to: "/posters",
-      title: "Settings",
+      title: "Posters",
       label: "Posters",
+      icon: userIcon,
+    },
+    {
+      to: "/Banner",
+      title: "Banner",
+      label: "Banner",
       icon: userIcon,
     },
   ];
@@ -181,14 +189,16 @@ const Sidebar = () => {
       <aside
         ref={sidebarRef}
         id="logo-sidebar"
-        className={`fixed top-0 left-0 w-60 h-screen transition-transform bg-gray-50 ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full sm:translate-x-0"
+        className={`fixed top-0 left-0 z-40 w-60 h-screen transition-transform bg-gray-50 ${
+          isSidebarOpen
+            ? "translate-x-0"
+            : "-translate-x-full sm:translate-x-0"
         }`}
         aria-label="Sidebar"
       >
         <div className="flex flex-col h-full overflow-hidden">
           <Link
-            onClick={() => handleClickOutside(click)}
+            onClick={closeSidebar}
             to="/"
             className="flex items-center py-6 px-7"
           >
@@ -199,18 +209,20 @@ const Sidebar = () => {
               {links.map(({ to, title, label, icon: Icon }, index) => (
                 <li key={to}>
                   <Link
-                    onClick={() => handleClickOutside(click)}
+                    onClick={closeSidebar}
                     to={to}
                     title={title}
                     className={`flex items-center px-7 py-3 rounded-lg hover:bg-gray-200 ${
                       isLinkActive(to) ? "bg-gray-200" : ""
                     }`}
                   >
-                    {typeof Icon === "string" ? (
-                      <img src={Icon} alt="icon" className="w-6 h-6" />
-                    ) : (
-                      <Icon className="w-6 h-6" />
-                    )}
+                    {Icon ? (
+                      typeof Icon === "string" ? (
+                        <img src={Icon} alt="icon" className="w-6 h-6" />
+                      ) : (
+                        <Icon className="w-6 h-6" />
+                      )
+                    ) : null}
                     <span className="ml-3 text-base font-bold">{label}</span>
                   </Link>
                 </li>
