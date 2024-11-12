@@ -43,6 +43,7 @@ import RAReview from "./components/RAReview/RAReview";
 import WhatsappCamp from "./components/WhatsappCamp/WhatsappCamp";
 import APReview from "./components/APReview/APReview";
 import Poster from "./components/Posters/Poster";
+import BannerAdmin from "./components/BannerAdmin/BannerAdmin";
 
 const App = () => {
   const token = sessionStorage.getItem("creds");
@@ -84,6 +85,7 @@ const App = () => {
           <Route path="Onboarding/RA/:onBoardId" element={<RAReview />} />
           <Route path="Onboarding/AP/:onBoardAPId" element={<APReview />} />
           <Route path="posters" element={<Poster />} />
+          <Route path="bannerImages" element={<BannerAdmin />} />
         </Route>
         <Route path="signup" element={<Signup />} />
       </>

@@ -82,6 +82,16 @@ const SecondTimePayment = ({ searchQuery, onTableData }) => {
     }
   };
 
+  const handleClearDateRange = () => {
+    setDateRange([
+      {
+        startDate: null,
+        endDate: addDays(new Date(), 7),
+        key: "selection",
+      },
+    ]);
+  };
+
   return (
     <div className="py-4 px-8">
       <div className="w-full flex flex-row-reverse">
@@ -93,14 +103,27 @@ const SecondTimePayment = ({ searchQuery, onTableData }) => {
         >
           Download Sheet
         </button>
-        <button
-          onClick={() => setShowDatePicker(true)}
-          className="border-2 border-black rounded-lg px-4 py-1 mr-4"
-          disabled={loading} // Disable button while loading
-        >
-          Select Date Range
-        </button>
+
+        {/* Show "Clear" button when a date range is selected, otherwise show "Select Date Range" */}
+        {dateRange[0].startDate ? (
+          <button
+            onClick={handleClearDateRange}
+            className="border-2 border-black rounded-lg px-4 py-1 mr-4"
+            disabled={loading} // Disable while loading
+          >
+            Clear
+          </button>
+        ) : (
+          <button
+            onClick={() => setShowDatePicker(true)}
+            className="border-2 border-black rounded-lg px-4 py-1 mr-4"
+            disabled={loading} // Disable while loading
+          >
+            Select Date Range
+          </button>
+        )}
       </div>
+
       {showDatePicker && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white rounded-lg p-4 w-11/12 md:w-1/2 lg:w-1/3">
@@ -122,6 +145,7 @@ const SecondTimePayment = ({ searchQuery, onTableData }) => {
           </div>
         </div>
       )}
+
       <div className="flex justify-between items-center mt-4">
         <button
           onClick={handlePreviousPage}
@@ -132,13 +156,15 @@ const SecondTimePayment = ({ searchQuery, onTableData }) => {
         >
           Previous
         </button>
-        <span>Page {currentPage} of {totalPages}</span>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
         <div>Count: {count}</div>
         <button
           onClick={handleNextPage}
-          disabled={currentPage === totalPages || loading} // Disable button while loading
+          disabled={currentPage === totalPages || loading || count === 0} // Disable button while loading
           className={`border-2 border-black rounded-lg px-4 py-1 ${
-            currentPage === totalPages || loading
+            currentPage === totalPages || loading || count === 0
               ? "opacity-50 cursor-not-allowed"
               : ""
           }`}
@@ -146,6 +172,7 @@ const SecondTimePayment = ({ searchQuery, onTableData }) => {
           Next
         </button>
       </div>
+
       {loading ? (
         <div className="text-center mt-4">Loading...</div> // Loading indicator
       ) : (
@@ -178,6 +205,7 @@ const SecondTimePayment = ({ searchQuery, onTableData }) => {
           </tbody>
         </table>
       )}
+
       <div className="flex justify-between items-center mt-4">
         <button
           onClick={handlePreviousPage}
@@ -188,13 +216,15 @@ const SecondTimePayment = ({ searchQuery, onTableData }) => {
         >
           Previous
         </button>
-        <span>Page {currentPage} of {totalPages}</span>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
         <div>Count: {count}</div>
         <button
           onClick={handleNextPage}
-          disabled={currentPage === totalPages || loading} // Disable button while loading
+          disabled={currentPage === totalPages || loading || count === 0} // Disable button while loading
           className={`border-2 border-black rounded-lg px-4 py-1 ${
-            currentPage === totalPages || loading
+            currentPage === totalPages || loading || count === 0
               ? "opacity-50 cursor-not-allowed"
               : ""
           }`}

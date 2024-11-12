@@ -66,6 +66,12 @@ const Sidebar = () => {
       icon: IoSettingsOutline,
     },
     {
+      to: "/bannerImages",
+      title: "Settings",
+      label: "Banner Images",
+      icon: IoSettingsOutline,
+    },
+    {
       to: "/Onboarding",
       title: "Settings",
       label: "Onboarding",
@@ -133,12 +139,6 @@ const Sidebar = () => {
       to: "/CPDiscount",
       title: "Settings",
       label: "CP Discount",
-      icon: userIcon,
-    },
-    {
-      to: "/Onboarding",
-      title: "Settings",
-      label: "Onboarding",
       icon: userIcon,
     },
     {
