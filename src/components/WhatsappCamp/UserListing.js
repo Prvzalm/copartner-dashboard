@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { FixedSizeList as List } from "react-window";
 import CreateGroup from "./CreateGroup"; // Ensure this path is correct
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const UserListing = ({ apDetails }) => {
   const [selectedUsers, setSelectedUsers] = useState([]);
@@ -30,6 +32,41 @@ const UserListing = ({ apDetails }) => {
   useEffect(() => {
     console.log("UserListing - apDetails prop:", apDetails);
   }, [apDetails]);
+
+  /**
+   * Exports the provided data to an Excel file.
+   * @param {Array} data - The data to export.
+   * @param {string} fileName - The name of the Excel file.
+   */
+  const exportToExcel = (data, fileName = 'UserData.xlsx') => {
+    const exportData = data.map(user => ({
+      ID: user.id,
+      Name: user.name,
+      Mobile: user.mobileNumber,
+      KYC: user.isKYC ? 'Yes' : 'No',
+      ReferralMode: user.referralMode,
+      LandingURL: user.landingPageUrl,
+      RAName: user.subscriptions.map(sub => sub.RAname).join(', '),
+      Amount: user.subscriptions.map(sub => sub.amount).join(', '),
+      SubscriptionName: user.subscriptions.map(sub => sub.planType).join(', '),
+      SubscriptionType: user.subscriptions.map(sub => mapServiceType(sub.serviceType)).join(', '),
+      CreatedOn: user.createdOn ? new Date(user.createdOn).toLocaleDateString() : 'N/A',
+    }));
+
+    // Convert JSON data to a worksheet
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+  
+    // Create a workbook and append the worksheet
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Users');
+  
+    // Generate a binary Excel file
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  
+    // Convert buffer to a Blob and save it
+    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, fileName);
+  };
 
   /**
    * Flattens the combined user data into a flat list.
@@ -239,7 +276,7 @@ const UserListing = ({ apDetails }) => {
         return null;
       }
     },
-    [flattenedData, selectedUsers]
+    [flattenedData, selectedUsers, mapServiceType]
   );
 
   return (
@@ -252,12 +289,20 @@ const UserListing = ({ apDetails }) => {
             ({apDetails.length} total users)
           </span>
         </h2>
-        <button
-          className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
-          onClick={() => setShowPopup(true)}
-        >
-          Create Group
-        </button>
+        <div className="flex space-x-2">
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
+            onClick={() => setShowPopup(true)}
+          >
+            Create Group
+          </button>
+          <button
+            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition"
+            onClick={() => exportToExcel(apDetails, 'UserData.xlsx')}
+          >
+            Download Data
+          </button>
+        </div>
       </div>
 
       {/* Table Header */}
@@ -271,7 +316,7 @@ const UserListing = ({ apDetails }) => {
         </div>
         <div className="w-2/12 p-2 font-bold">Date</div>
         <div className="w-2/12 p-2 font-bold">Name</div>
-        {/* Removed Email Column */}
+        
         <div className="w-2/12 p-2 font-bold">Mobile</div>
         <div className="w-1/12 p-2 font-bold text-center">KYC</div>
         <div className="w-1/12 p-2 font-bold">Referral Mode</div>
