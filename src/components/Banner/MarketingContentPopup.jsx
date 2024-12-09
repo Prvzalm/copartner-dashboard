@@ -154,6 +154,7 @@ function MarketingContentPopup({ onClose, contentType, onSave }) {
                 <MenuItem value="webinar">Webinar</MenuItem>
                 <MenuItem value="course">Course</MenuItem>
                 <MenuItem value="premium">Premium</MenuItem>
+                <MenuItem value="website">Website-Only</MenuItem>
               </Select>
             </FormControl>
 
