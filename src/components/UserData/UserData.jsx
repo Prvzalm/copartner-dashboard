@@ -6,6 +6,7 @@ import PageHeader from "../Header/Header";
 import SecondTimePayment from "./SecondTimePayment";
 import * as XLSX from "xlsx";
 import MinorSubscription from "./MinorSubscription";
+import AppSubscription from "./AppSubscription";
 
 const UserData = () => {
   const [activeButton, setActiveButton] = useState("Registration");
@@ -84,6 +85,16 @@ const UserData = () => {
         >
           Minor Subscription
         </button>
+        <button
+          onClick={() => handleButtonClick("App Subscription")}
+          className={`md:px-8 px-2 md:py-2 py-2 md:max-w-44 border-2 rounded-xl ${
+            activeButton === "App Subscription"
+              ? "border-black"
+              : "border-gray-200"
+          } font-semibold`}
+        >
+          App Subscription
+        </button>
       </div>
 
       <div className="p-4">
@@ -112,6 +123,12 @@ const UserData = () => {
             )}
             {activeButton === "Minor Subscription" && (
               <MinorSubscription
+                searchQuery={searchQuery}
+                onTableData={handleTableData}
+              />
+            )}
+            {activeButton === "App Subscription" && (
+              <AppSubscription
                 searchQuery={searchQuery}
                 onTableData={handleTableData}
               />

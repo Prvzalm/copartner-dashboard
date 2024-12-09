@@ -1,106 +1,95 @@
 import React, { useState, useEffect } from "react";
-import { addDays } from "date-fns";
+import axios from "axios";
 import { DateRange } from "react-date-range";
 
-const MinorSubscription = ({ searchQuery, onTableData }) => {
-  const [payments, setPayments] = useState([]);
+const AppSubscription = () => {
+  const [loading, setLoading] = useState(true);
   const [filteredData, setFilteredData] = useState([]);
-  const [count, setCount] = useState(0);
+  const [userInfo, setUserInfo] = useState({});
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [dateRange, setDateRange] = useState([
     {
       startDate: null,
-      endDate: addDays(new Date(), 7),
+      endDate: null,
       key: "selection",
     },
   ]);
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalRows, setTotalRows] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
+  const [count, setCount] = useState(0);
   const pageSize = 500;
 
-  // Function to fetch payments
-  const fetchPayments = async (page) => {
-    setLoading(true); // Set loading to true when starting to fetch data
-    const fetchFirstTimePayments = async () => {
-      try {
-        const res = await fetch(
-          `https://copartners.in:5134/api/UserData/UserFirstTimePaymentListing?page=${page}&pageSize=${pageSize}`
-        );
-        const data = await res.json();
-        if (data.isSuccess && data.data.length > 0) {
-          return {
-            payments: data.data,
-            totalRows: data.data[0].totalRows || 0,
-          };
-        }
-        return { payments: [], totalRows: 0 };
-      } catch {
-        return { payments: [], totalRows: 0 };
+  const totalRows = filteredData.length;
+
+  const fetchData = async (page) => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        `https://copartners.in:5009/api/Subscriber?plateform=App&page=${page}&pageSize=${pageSize}`
+      );
+      if (response.data.isSuccess) {
+        const data = response.data.data;
+        setFilteredData(data);
+        setCount(data.length);
+        setTotalPages(1); // Assuming 1 page, you can adjust if pagination is involved
+
+        // Fetch user names for each userId
+        const userIds = data.map((item) => item.userId);
+        const userDetails = await fetchUserDetails(userIds);
+        setUserInfo(userDetails);
       }
-    };
-
-    const fetchSecondTimePayments = async () => {
-      try {
-        const res = await fetch(
-          `https://copartners.in:5134/api/UserData/UserSecondTimePaymentListing?page=${page}&pageSize=${pageSize}`
-        );
-        const data = await res.json();
-        if (data.isSuccess && data.data.length > 0) {
-          return {
-            payments: data.data,
-            totalRows: data.data[0].totalRows || 0,
-          };
-        }
-        return { payments: [], totalRows: 0 };
-      } catch {
-        return { payments: [], totalRows: 0 };
-      }
-    };
-
-    const firstPaymentsResponse = await fetchFirstTimePayments();
-    const secondPaymentsResponse = await fetchSecondTimePayments();
-
-    const combinedPayments = [
-      ...firstPaymentsResponse.payments,
-      ...secondPaymentsResponse.payments,
-    ];
-
-    setPayments(combinedPayments);
-
-    // Calculate total rows as the sum of both APIs
-    const totalRowsSum =
-      firstPaymentsResponse.totalRows + secondPaymentsResponse.totalRows;
-    setTotalRows(totalRowsSum);
-    setTotalPages(Math.ceil(totalRowsSum / pageSize));
-
-    setLoading(false); // Set loading to false when done fetching
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    // Fetch payments whenever currentPage changes
-    fetchPayments(currentPage);
+    fetchData(currentPage);
   }, [currentPage]);
 
-  useEffect(() => {
-    // Filter the data based on searchQuery, dateRange, and payments
-    const start = dateRange[0].startDate;
-    const end = dateRange[0].endDate;
+  // Fetch user details for each userId
+  const fetchUserDetails = async (userIds) => {
+    const userDetails = {};
+    for (const userId of userIds) {
+      try {
+        const response = await axios.get(
+          `https://copartners.in:5131/api/User/${userId}`
+        );
+        if (response.data.isSuccess) {
+          userDetails[userId] = {
+            name: response.data.data.name,
+            mobileNumber: response.data.data.mobileNumber,
+            referralMode: response.data.data.referralMode,
+          };
+        } else {
+          userDetails[userId] = { name: "Unknown User", mobileNumber: "N/A" }; // Fallback if no user is found
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        userDetails[userId] = { name: "Unknown User", mobileNumber: "N/A" }; // Fallback if an error occurs
+      }
+    }
+    return userDetails;
+  };
 
-    const filtered = payments.filter(
-      (user) =>
-        user.mobile.includes(searchQuery) &&
-        user.isSpecialSubscription &&
-        (!start || !end || (new Date(user.date) >= start && new Date(user.date) <= end))
-    );
+  // Handle Date Range Clear
+  const handleClearDateRange = () => {
+    setDateRange([
+      {
+        startDate: null,
+        endDate: null,
+        key: "selection",
+      },
+    ]);
+  };
 
-    setFilteredData(filtered);
-    setCount(filtered.length);
-  }, [payments, searchQuery, dateRange]);
-
-  const determineUserType = (userData) => {
-    return userData.apId ? "AP" : userData.raId ? "RA" : "CP";
+  // Handle page navigation
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
   };
 
   const handleNextPage = () => {
@@ -109,40 +98,23 @@ const MinorSubscription = ({ searchQuery, onTableData }) => {
     }
   };
 
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
-    }
-  };
-
-  const handleClearDateRange = () => {
-    setDateRange([
-      {
-        startDate: null,
-        endDate: addDays(new Date(), 7),
-        key: "selection",
-      },
-    ]);
-  };
-
   return (
     <div className="py-4 px-8">
       <div className="w-full flex flex-row-reverse">
         <div>Total Count: {totalRows}</div>
         <button
-          onClick={() => onTableData(filteredData)}
+          onClick={() => {}}
           className="border-2 border-black rounded-lg px-4 py-1 mr-4"
-          disabled={loading} // Disable button when loading
+          disabled={loading}
         >
           Download Sheet
         </button>
 
-        {/* Show "Clear" button when a date range is selected, otherwise show "Select Date Range" */}
         {dateRange[0].startDate ? (
           <button
             onClick={handleClearDateRange}
             className="border-2 border-black rounded-lg px-4 py-1 mr-4"
-            disabled={loading} // Disable while loading
+            disabled={loading}
           >
             Clear
           </button>
@@ -150,7 +122,7 @@ const MinorSubscription = ({ searchQuery, onTableData }) => {
           <button
             onClick={() => setShowDatePicker(true)}
             className="border-2 border-black rounded-lg px-4 py-1 mr-4"
-            disabled={loading} // Disable while loading
+            disabled={loading}
           >
             Select Date Range
           </button>
@@ -224,15 +196,20 @@ const MinorSubscription = ({ searchQuery, onTableData }) => {
             {filteredData.map((payment) => (
               <tr key={payment.userId}>
                 <td style={{ textAlign: "left", paddingLeft: "2rem" }}>
-                  {new Date(payment.date).toLocaleDateString()}
+                  {new Date(payment.transactionDate).toLocaleDateString()}
                 </td>
                 <td style={{ textAlign: "left", paddingLeft: "2rem" }}>
-                  {new Date(payment.date).toLocaleTimeString()}
+                  {new Date(payment.transactionDate).toLocaleTimeString()}
                 </td>
-                <td style={{ textAlign: "left" }}>{payment.mobile}</td>
-                <td style={{ textAlign: "left" }}>{determineUserType(payment)}</td>
-                <td>{payment.name || "-"}</td>
-                <td>{payment.payment}</td>
+                <td style={{ textAlign: "left" }}>
+                  {userInfo[payment.userId]?.mobileNumber || "-"}
+                </td>
+                <td style={{ textAlign: "left" }}>
+                  {userInfo[payment.userId]?.referralMode || "-"}
+                </td>
+                <td>{userInfo[payment.userId]?.name || "-"}</td>{" "}
+                {/* Displaying user name */}
+                <td>{payment.totalAmount}</td>
               </tr>
             ))}
           </tbody>
@@ -269,4 +246,4 @@ const MinorSubscription = ({ searchQuery, onTableData }) => {
   );
 };
 
-export default MinorSubscription;
+export default AppSubscription;
