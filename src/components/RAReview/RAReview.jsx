@@ -7,6 +7,7 @@ import SecondComponent from "./SecondComponent";
 import ThirdComponent from "./ThirdComponent";
 import FourthComponent from "./FourthComponent";
 import FifthComponent from "./FifthComponent";
+import SixthComponent from "./SixthComponent";
 
 const RAReview = () => {
   const { onBoardId } = useParams();
@@ -36,6 +37,7 @@ const RAReview = () => {
         <ThirdComponent handleNextStep={() => {}} onBoardId={onBoardId} />
         <FourthComponent handleNextStep={() => {}} onBoardId={onBoardId} />
         <FifthComponent handleNextStep={() => {}} onBoardId={onBoardId} />
+        <SixthComponent handleNextStep={() => {}} onBoardId={onBoardId} />
       </div>
     </div>
   );
